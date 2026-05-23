@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Browser extension built with Vue 3 + Vite, targeting Manifest V3 for Chrome and Firefox (with Edge support). Based on the [vite-vue3-browser-extension-v3](https://github.com/mubaidr/vite-vue3-browser-extension-v3) template.
+Browser extension for parsing Bitrix24 tasks and generating AI prompts. Built with Vue 3 + Vite, targeting Manifest V3 for Chrome and Firefox.
 
 ## Commands
 
@@ -27,15 +27,11 @@ No test framework is configured. There is no `npm test`.
 
 Each context is an isolated Vue app with its own entry point (`index.ts`, `index.html`, `app.vue`):
 
-- **`src/background/`** — Service worker (`chrome.runtime.onInstalled`, lifecycle events)
-- **`src/content-script/`** — Injected into all pages (`*://*/*`, `document_end`). Creates an iframe pointing to `content-script-iframe` UI
-- **`src/ui/action-popup/`** — Browser action popup (click extension icon)
-- **`src/ui/options-page/`** — Full options page
-- **`src/ui/side-panel/`** — Chrome side panel
-- **`src/ui/devtools-panel/`** — DevTools panel (separate HTML entry via `rollupOptions.input`)
-- **`src/ui/setup/`** — Install/update wizard (opened by background on `onInstalled`)
-- **`src/ui/content-script-iframe/`** — UI rendered inside content script's iframe
-- **`src/ui/common/pages/`** — Shared pages (404, about, help, etc.) accessible from all contexts
+- **`src/background/`** — Service worker. Opens side-panel on extension icon click.
+- **`src/content-script/`** — Injected into Bitrix24 pages. Parses task data from DOM.
+- **`src/ui/side-panel/`** — Main UI. Shows parsed task, generates AI prompts.
+- **`src/ui/options-page/`** — Extension settings.
+- **`src/ui/common/pages/`** — Shared pages (404) accessible from all contexts.
 
 ### File-Based Routing
 
@@ -50,22 +46,21 @@ Two separate Vite configs inherit from `vite.config.ts`:
 - `vite.firefox.config.ts` — Similar for Firefox
 
 The base `vite.config.ts` configures:
-- `@nuxt/ui/vite` — handles auto-imports, component registration, and UI framework
+- `@vitejs/plugin-vue` — Vue SFC support
 - `vue-router/vite` — file-based routing
-- `@intlify/unplugin-vue-i18n` — i18n from `src/locales/`
-- `unplugin-turbo-console` — enhanced console logging
+- `@tailwindcss/vite` — Tailwind CSS v4
 - Build-time constants via `define.config.mjs` (accessible as `__VERSION__`, `__NAME__`, etc.)
 
 ### State Management
 
 - **Pinia** stores in `src/stores/`, suffix: `*.store.ts`, Composition API style
-- **`useBrowserSyncStorage`** / **`useBrowserLocalStorage`** (`src/composables/useBrowserStorage.ts`) — reactive refs synced with `chrome.storage.sync` / `chrome.storage.local`, with deep merge for nested objects and type checking
-- **`useTheme`** — dark/light mode persisted via `useBrowserLocalStorage`, supports both shadow DOM and main document
+- **`useBrowserSyncStorage`** / **`useBrowserLocalStorage`** (`src/composables/useBrowserStorage.ts`) — reactive refs synced with `chrome.storage.sync` / `chrome.storage.local`
+- **`useTheme`** — dark/light mode persisted via `useBrowserLocalStorage`
 
 ### Communication
 
 - `webext-bridge` for cross-context messaging between background, content scripts, and UI
-- `webextension-polyfill` for cross-browser API compatibility (auto-imported as `browser`)
+- `webextension-polyfill` for cross-browser API compatibility
 
 ### Build-Time Constants
 
@@ -77,21 +72,14 @@ The base `vite.config.ts` configures:
 - **Vue SFC**: `<script setup lang="ts">` exclusively
 - **TypeScript**: strict mode, avoid `any`
 - **Console**: use `console.info`, `console.warn`, `console.error` — `console.log` is an ESLint warning
-- **Auto-imports**: Vue functions (`ref`, `computed`, `watch`), Pinia (`defineStore`), vue-router, vue-i18n, stores, composables, and utils are all auto-imported — do not add explicit imports for these
+- **Explicit imports**: Vue functions (`ref`, `computed`, `watch`), Pinia (`defineStore`), vue-router — must be imported explicitly, no auto-imports
 - **Path aliases**: `@/` → `src/`, `~/` → project root, `src/` → `src/`, `@assets/` → `src/assets/`
-- **Components**: PascalCase `.vue` files. Shared in `src/components/`, context-specific colocated. `@nuxt/ui` auto-registers components from `src/components/` with directory-as-namespace
 
 ## UI Framework
 
-- **@nuxt/ui v4** (not Nuxt itself — just the UI layer via Vite plugin)
-- **shadcn-vue** (new-york style, stone base color) — components go to `src/components/ui/`
-- **Tailwind CSS 4** with `@tailwindcss/typography`
-- Primary color: green, neutral: slate
-- **Lucide** icons via `lucide-vue-next` and `@iconify-json/lucide`
-
-## i18n
-
-Locale files in `src/locales/` (en.json, zh.json). Auto-imported `useI18n` and `t` functions. SFC global scope enabled.
+- **Tailwind CSS 4** with `@tailwindcss/typography` via `@tailwindcss/vite` plugin
+- Custom CSS variables in `src/assets/base.css` (`--primary`, `--background`, `--foreground`, etc.)
+- Plain HTML elements + Tailwind utility classes (no component library)
 
 ## Before Committing
 
@@ -103,7 +91,7 @@ Locale files in `src/locales/` (en.json, zh.json). Auto-imported `useI18n` and `
 
 - Chrome config uses `@crxjs/vite-plugin` which handles manifest generation and HMR in dev mode
 - Firefox config does a watch-mode build (no full HMR)
-- Content script injects an iframe into the host page; the actual UI lives in `content-script-iframe`
-- `src/ui/setup/index.html` and `src/ui/content-script-iframe/index.html` are web-accessible resources
+- Content script targets Bitrix24 domains (`*://*.bitrix24.ru/*`, `*://*.bitrix24.com/*`)
+- Clicking extension icon opens side-panel via `chrome.sidePanel.open()`
 - Production builds are zipped (`vite-plugin-zip-pack`) for store submission
 - `npm run launch` / `npm run launch:all` — auto-launches extension in installed browsers via `scripts/launch.ts`

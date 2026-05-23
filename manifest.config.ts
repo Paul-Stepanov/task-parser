@@ -11,9 +11,6 @@ const [major, minor, patch, label = "0"] = version
   .split(/[.-]/)
 
 export default {
-  author: {
-    email: "mubaidr@gmail.com",
-  },
   name: env.mode === "staging" ? `[INTERNAL] ${name}` : displayName || name,
   description,
   // up to four numbers separated by dots
@@ -21,9 +18,8 @@ export default {
   // semver is OK in "version_name"
   version_name: version,
   manifest_version: 3,
-  // key: '',
   action: {
-    default_popup: "src/ui/action-popup/index.html",
+    default_title: "Task Parser — открыть панель",
   },
   background: {
     service_worker: "src/background/index.ts",
@@ -40,22 +36,10 @@ export default {
   side_panel: {
     default_path: "src/ui/side-panel/index.html",
   },
-  devtools_page: "src/devtools/index.html",
   options_page: "src/ui/options-page/index.html",
   offline_enabled: true,
   host_permissions: ["<all_urls>"],
-  permissions: ["storage", "tabs", "background", "sidePanel"],
-  web_accessible_resources: [
-    {
-      resources: [
-        "src/ui/setup/index.html",
-        "src/ui/content-script-iframe/index.html",
-        "src/ui/devtools-panel/index.html",
-      ],
-      matches: ["<all_urls>"],
-      use_dynamic_url: false,
-    },
-  ],
+  permissions: ["storage", "tabs", "background", "sidePanel", "activeTab"],
   icons: {
     16: "src/assets/logo.png",
     24: "src/assets/logo.png",

@@ -1,4 +1,5 @@
 import type { BasicColorSchema } from "@vueuse/core"
+import { computed, watch } from "vue"
 import { useBrowserLocalStorage } from "./useBrowserStorage"
 import { name } from "~/package.json"
 

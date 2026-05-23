@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import RouterLinkUp from "src/components/RouterLinkUp.vue"
+import { useRouter } from "vue-router"
+
+const router = useRouter()
 </script>
 
 <template>
-  <div>
-    <RouterLinkUp label="Go to Home" />
-
-    <div class="text-center">
-      <h1 class="mb-0">404</h1>
-      <p class="mt-0">Page Not Found</p>
-      <p class="text-sm">Sorry, the page you are looking for does not exist.</p>
-    </div>
+  <div class="p-4 text-center">
+    <h1 class="text-2xl font-bold">404</h1>
+    <p class="mt-2">Страница не найдена</p>
+    <button
+      class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      @click="router.push('/')"
+    >
+      На главную
+    </button>
   </div>
 </template>

@@ -1,4 +1,4 @@
-import { ref, watch, nextTick } from "vue"
+import { ref, watch, nextTick, toRaw } from "vue"
 
 function mergeDeep(defaults: any, source: any): any {
   // Merge the default options with the stored options

@@ -1,15 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <UApp>
-    <AppHeader />
-
-    <div class="p-4 prose dark:prose-invert">
-      <RouterView />
-    </div>
-
-    <AppFooter />
-  </UApp>
+  <div class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <RouterView />
+  </div>
 </template>
-
-<style scoped></style>

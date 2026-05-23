@@ -1,60 +1,63 @@
 <script setup lang="ts">
+import { useOptionsStore } from "src/stores/options.store"
+import { storeToRefs } from "pinia"
+
 const optionsStore = useOptionsStore()
-// const { toggleDark } = optionsStore
 const { isDark, profile, others } = storeToRefs(optionsStore)
 </script>
 
 <template>
-  <div
-    class="max-w-xl w-full mx-auto rounded-xl md:my-12 p-4 md:p-8 md:border border-base-200 md:shadow-lg bg-base-100"
-  >
-    <RouterLinkUp />
+  <div class="max-w-xl w-full mx-auto p-8">
+    <h1 class="text-xl font-bold mb-4">Настройки</h1>
 
-    <h1>Options</h1>
-    <p>
-      You can configure various options related to this extension here. These
-      options/ settings are peristent, available in all contexts, implemented
-      using Pinia and useBrowserStorage composable.
-    </p>
+    <div class="space-y-6">
+      <div>
+        <h3 class="font-semibold mb-2">Интерфейс</h3>
+        <label class="flex items-center gap-2">
+          <input v-model="isDark" type="checkbox" class="rounded" />
+          Тёмная тема
+        </label>
+      </div>
 
-    <h3>User Interface</h3>
-    <p>Change application interface settings.</p>
+      <div>
+        <h3 class="font-semibold mb-2">Профиль</h3>
+        <div class="space-y-2">
+          <label class="block">
+            <span class="text-sm text-gray-600">Имя</span>
+            <input
+              v-model="profile.name"
+              type="text"
+              class="w-full border rounded px-3 py-1.5 mt-1"
+            />
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">Возраст</span>
+            <input
+              v-model="profile.age"
+              type="number"
+              class="w-full border rounded px-3 py-1.5 mt-1"
+            />
+          </label>
+        </div>
+      </div>
 
-    <UForm class="space-y-4">
-      <UFormField label="Theme">
-        <USwitch v-model="isDark" />
-      </UFormField>
-
-      <h3>Profile</h3>
-      <p>Change your name and age.</p>
-
-      <UFormField label="Name">
-        <UInput v-model="profile.name"></UInput>
-      </UFormField>
-
-      <UFormField label="Age">
-        <UInput v-model="profile.age"></UInput>
-      </UFormField>
-
-      <h3>Others</h3>
-      <p>Some other settings related to extension usage.</p>
-
-      <UFormField label="Awesome Feature">
-        <USwitch v-model="others.awesome" />
-      </UFormField>
-
-      <UFormField label="Counter">
-        <UInput
-          v-model="others.counter"
-          type="number"
-        ></UInput>
-      </UFormField>
-
-      <p>
-        * You can also make this a compoenent and then able to use this in any
-        context like Popup, Developer Tools UI etc
-      </p>
-      <p>Feel free to change groups or options as per your requirements.</p>
-    </UForm>
+      <div>
+        <h3 class="font-semibold mb-2">Прочее</h3>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2">
+            <input v-model="others.awesome" type="checkbox" class="rounded" />
+            Awesome Feature
+          </label>
+          <label class="block">
+            <span class="text-sm text-gray-600">Счётчик</span>
+            <input
+              v-model="others.counter"
+              type="number"
+              class="w-full border rounded px-3 py-1.5 mt-1"
+            />
+          </label>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

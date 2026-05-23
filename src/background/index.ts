@@ -1,28 +1,7 @@
-// Sample code if using extensionpay.com
-// import { extPay } from 'src/utils/payment/extPay'
-// extPay.startBackground()
-
-chrome.runtime.onInstalled.addListener(async (opt) => {
-  // Check if reason is install or update. Eg: opt.reason === 'install' // If extension is installed.
-  // opt.reason === 'update' // If extension is updated.
-  if (opt.reason === "install") {
-    chrome.tabs.create({
-      active: true,
-      // Open the setup page and append `?type=install` to the URL so frontend
-      // can know if we need to show the install page or update page.
-      url: chrome.runtime.getURL("src/ui/setup/index.html"),
-    })
-
-    return
-  }
-
-  if (opt.reason === "update") {
-    chrome.tabs.create({
-      active: true,
-      url: chrome.runtime.getURL("src/ui/setup/index.html?type=update"),
-    })
-
-    return
+// Open side panel when user clicks the extension icon
+chrome.action.onClicked.addListener(async (tab) => {
+  if (tab.id !== undefined) {
+    await chrome.sidePanel.open({ tabId: tab.id })
   }
 })
 
@@ -34,6 +13,6 @@ self.onerror = function (message, source, lineno, colno, error) {
   console.info("Error object: " + error)
 }
 
-console.info("hello world from background")
+console.info("Task Parser background script loaded")
 
 export {}
