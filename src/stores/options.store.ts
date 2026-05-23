@@ -1,5 +1,4 @@
 import { defineStore } from "pinia"
-import { computed, watch } from "vue"
 import { useTheme } from "src/composables/useTheme"
 import { useBrowserSyncStorage } from "src/composables/useBrowserStorage"
 import { useBrowserLocalStorage } from "src/composables/useBrowserStorage"
