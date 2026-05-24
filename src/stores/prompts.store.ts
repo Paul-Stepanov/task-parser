@@ -12,14 +12,12 @@ import {
 
 export const usePromptsStore = defineStore("prompts", () => {
   const currentPrompt = ref<GeneratedPrompt | null>(null)
-  const isGenerating = ref(false)
   const error = ref<string | null>(null)
 
   function generateReportPrompt(
     taskData: Bitrix24TaskData,
     commitsData?: GitLabCommitsData | null,
   ) {
-    isGenerating.value = true
     error.value = null
 
     try {
@@ -33,13 +31,10 @@ export const usePromptsStore = defineStore("prompts", () => {
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Ошибка генерации промпта"
-    } finally {
-      isGenerating.value = false
     }
   }
 
   function generateEstimatePrompt(taskData: Bitrix24TaskData) {
-    isGenerating.value = true
     error.value = null
 
     try {
@@ -53,8 +48,6 @@ export const usePromptsStore = defineStore("prompts", () => {
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : "Ошибка генерации промпта"
-    } finally {
-      isGenerating.value = false
     }
   }
 
@@ -65,7 +58,6 @@ export const usePromptsStore = defineStore("prompts", () => {
 
   return {
     currentPrompt,
-    isGenerating,
     error,
     generateReportPrompt,
     generateEstimatePrompt,

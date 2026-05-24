@@ -35,9 +35,14 @@ export function useTheme() {
     isDark.value = !isDark.value
   }
 
-  watch(isDark, (newValue) => {
-    applyTheme(newValue ? "dark" : "light")
-  })
+  // Initialize theme after loading from storage and on changes
+  watch(
+    mode,
+    (newMode) => {
+      applyTheme(newMode)
+    },
+    { immediate: true },
+  )
 
   return {
     mode,

@@ -4,19 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Browser extension for parsing Bitrix24 tasks and generating AI prompts. Built with Vue 3 + Vite, targeting Manifest V3 for Chrome and Firefox.
+Browser extension for parsing Bitrix24 tasks and generating AI prompts. Built with Vue 3 + Vite, targeting Manifest V3 for Chrome.
 
 ## Commands
 
 ```bash
-npm run dev:chrome      # Dev server for Chrome (HMR, sourcemaps)
-npm run dev:firefox     # Dev build + watch for Firefox
-npm run build           # Production build for both browsers → dist/chrome, dist/firefox
-npm run build:chrome    # Production build for Chrome only
-npm run build:firefox   # Production build for Firefox only
+npm run dev             # Dev server for Chrome (HMR, sourcemaps)
+npm run build           # Production build for Chrome → dist/chrome
 npm run lint            # ESLint with auto-fix (caches results)
 npm run typecheck       # vue-tsc --noEmit (strict TypeScript)
 npm run format          # Prettier formatting
+npm run launch          # Launch Chrome with loaded extension
 ```
 
 No test framework is configured. There is no `npm test`.
@@ -41,9 +39,8 @@ Router uses `createWebHashHistory()` — all routes are hash-based.
 
 ### Build System
 
-Two separate Vite configs inherit from `vite.config.ts`:
+Vite config inherits from `vite.config.ts`:
 - `vite.chrome.config.ts` — Uses `@crxjs/vite-plugin` for Chrome Manifest V3
-- `vite.firefox.config.ts` — Similar for Firefox
 
 The base `vite.config.ts` configures:
 - `@vitejs/plugin-vue` — Vue SFC support
@@ -59,8 +56,8 @@ The base `vite.config.ts` configures:
 
 ### Communication
 
-- `webext-bridge` for cross-context messaging between background, content scripts, and UI
-- `webextension-polyfill` for cross-browser API compatibility
+- `chrome.runtime.sendMessage` / `chrome.tabs.sendMessage` for cross-context messaging
+- Side Panel uses `chrome.scripting.executeScript` to parse page content (Side Panel is isolated from page DOM)
 
 ### Build-Time Constants
 
@@ -85,13 +82,13 @@ The base `vite.config.ts` configures:
 
 1. `npm run lint` — zero errors
 2. `npm run typecheck` — no type errors
-3. Test in Chrome (load `dist/chrome` unpacked) and Firefox if making cross-browser changes
+3. Test in Chrome (load `dist/chrome` unpacked)
 
 ## Key Technical Notes
 
 - Chrome config uses `@crxjs/vite-plugin` which handles manifest generation and HMR in dev mode
-- Firefox config does a watch-mode build (no full HMR)
-- Content script targets Bitrix24 domains (`*://*.bitrix24.ru/*`, `*://*.bitrix24.com/*`)
+- Content script matches Bitrix24 domains (`*://*.bitrix24.ru/*`, `*://*.bitrix24.com/*`, `*://*.onpeak.ru/*`)
 - Clicking extension icon opens side-panel via `chrome.sidePanel.open()`
+- Side Panel is isolated from page DOM, uses `chrome.scripting.executeScript` to parse content
 - Production builds are zipped (`vite-plugin-zip-pack`) for store submission
-- `npm run launch` / `npm run launch:all` — auto-launches extension in installed browsers via `scripts/launch.ts`
+- `npm run launch` — auto-launches Chrome with loaded extension via `scripts/launch.ts`

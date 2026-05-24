@@ -1,17 +1,17 @@
 import { defineStore } from "pinia"
 import { ref, computed } from "vue"
-import { useBrowserSyncStorage } from "@/composables/useBrowserStorage"
+import { useBrowserLocalStorage } from "@/composables/useBrowserStorage"
 import type { GitLabSettings, GitLabCommitsData } from "@/types/gitlab"
 import { createGitLabAPI } from "@/utils/gitlab-api"
 
 export const useGitLabStore = defineStore("gitlab", () => {
-  const { data: settings } = useBrowserSyncStorage<GitLabSettings>(
+  const { data: settings } = useBrowserLocalStorage<GitLabSettings>(
     "gitlab-settings",
     {
       token: "",
       repositoryUrl: "",
       projectId: undefined,
-      defaultBranch: "main",
+      defaultBranch: "master",
       enabled: false,
     },
   )

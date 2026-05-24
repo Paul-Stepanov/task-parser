@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { usePromptsStore } from "@/stores/prompts.store"
+import { useToast } from "@/composables/useToast"
 import { computed, ref } from "vue"
 
 const promptsStore = usePromptsStore()
+const { success } = useToast()
 const prompt = computed(() => promptsStore.currentPrompt)
 
 const showSystem = ref(false)
-const copied = ref(false)
 
 async function copyToClipboard(text: string) {
   await navigator.clipboard.writeText(text)
-  copied.value = true
-  setTimeout(() => {
-    copied.value = false
-  }, 2000)
+  success("Скопировано в буфер обмена")
 }
 
 async function copyFullPrompt() {
@@ -37,7 +35,7 @@ async function copyFullPrompt() {
           class="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
           @click="copyFullPrompt"
         >
-          {{ copied ? "Скопировано!" : "Копировать всё" }}
+          Копировать всё
         </button>
         <button
           class="text-xs px-2 py-1 border rounded hover:bg-gray-50 dark:hover:bg-gray-800"

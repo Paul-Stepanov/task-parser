@@ -44,7 +44,7 @@ export default defineConfig({
     {
       name: "ensure-output-dir",
       buildStart() {
-        ;["dist/chrome", "dist/firefox"].forEach((dir) => {
+        ;["dist/chrome"].forEach((dir) => {
           if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
         })
       },

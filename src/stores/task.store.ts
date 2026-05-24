@@ -1,8 +1,11 @@
 import { defineStore } from "pinia"
 import { ref, computed } from "vue"
 import type { Bitrix24TaskData } from "@/types/bitrix24"
+import { useToast } from "@/composables/useToast"
 
 export const useTaskStore = defineStore("task", () => {
+  const { success, error } = useToast()
+
   const currentTask = ref<Bitrix24TaskData | null>(null)
   const isParsing = ref(false)
   const parseError = ref<string | null>(null)
@@ -23,12 +26,15 @@ export const useTaskStore = defineStore("task", () => {
 
       if (response?.success && response.data) {
         currentTask.value = response.data
+        success("Задача успешно спарсена")
       } else {
         parseError.value = response?.error || "Ошибка парсинга задачи"
+        error(parseError.value)
       }
-    } catch (error) {
+    } catch (err) {
       parseError.value =
-        error instanceof Error ? error.message : "Неизвестная ошибка"
+        err instanceof Error ? err.message : "Неизвестная ошибка"
+      error(parseError.value)
     } finally {
       isParsing.value = false
     }

@@ -29,7 +29,11 @@ export default {
     {
       all_frames: false,
       js: ["src/content-script/index.ts"],
-      matches: ["*://*/*"],
+      matches: [
+        "*://*.bitrix24.ru/*",
+        "*://*.bitrix24.com/*",
+        "*://*.onpeak.ru/*",
+      ],
       run_at: "document_end",
     },
   ],
@@ -37,8 +41,11 @@ export default {
     default_path: "src/ui/side-panel/index.html",
   },
   options_page: "src/ui/options-page/index.html",
-  offline_enabled: true,
-  host_permissions: ["<all_urls>"],
+  host_permissions: [
+    "*://*.bitrix24.ru/*",
+    "*://*.bitrix24.com/*",
+    "*://*.onpeak.ru/*",
+  ],
   permissions: ["storage", "tabs", "background", "sidePanel", "activeTab", "scripting"],
   icons: {
     16: "src/assets/logo.png",

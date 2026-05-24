@@ -1,14 +1,23 @@
 <script setup lang="ts">
 import { useOptionsStore } from "src/stores/options.store"
 import { useGitLabStore } from "@/stores/gitlab.store"
+import { useGitLabValidation } from "@/composables/useGitLabValidation"
+import { useToast } from "@/composables/useToast"
 import { storeToRefs } from "pinia"
-import { ref } from "vue"
-import { RouterLink } from "vue-router"
+import { computed, ref } from "vue"
 
 const optionsStore = useOptionsStore()
 const { isDark } = storeToRefs(optionsStore)
 
 const gitlabStore = useGitLabStore()
+const { success, error: showError } = useToast()
+
+const token = computed(() => gitlabStore.settings.token)
+const repositoryUrl = computed(() => gitlabStore.settings.repositoryUrl)
+const projectId = computed(() => gitlabStore.settings.projectId)
+
+const { tokenError, urlError, projectIdError, isValid } =
+  useGitLabValidation(token, repositoryUrl, projectId)
 
 const testResult = ref<{ success: boolean; message: string } | null>(null)
 const isTesting = ref(false)
@@ -39,11 +48,13 @@ async function testConnection() {
       success: true,
       message: "Соединение успешно! Токен валиден.",
     }
-  } catch (error) {
+    success(testResult.value.message)
+  } catch (err) {
     testResult.value = {
       success: false,
-      message: error instanceof Error ? error.message : "Ошибка подключения",
+      message: err instanceof Error ? err.message : "Ошибка подключения",
     }
+    showError(testResult.value.message)
   } finally {
     isTesting.value = false
   }
@@ -92,8 +103,20 @@ async function testConnection() {
                 type="password"
                 placeholder="glpat-..."
                 class="w-full px-3 py-2 border rounded text-sm"
+                :class="{
+                  'border-red-500 focus:ring-red-500': tokenError,
+                }"
               />
-              <p class="text-xs text-gray-500 mt-1">
+              <p
+                v-if="tokenError"
+                class="text-xs text-red-500 mt-1"
+              >
+                {{ tokenError }}
+              </p>
+              <p
+                v-else
+                class="text-xs text-gray-500 mt-1"
+              >
                 Токен с правами
                 <code>read_api</code>
                 и
@@ -110,7 +133,16 @@ async function testConnection() {
                 type="text"
                 placeholder="https://gitlab.com/group/project"
                 class="w-full px-3 py-2 border rounded text-sm"
+                :class="{
+                  'border-red-500 focus:ring-red-500': urlError,
+                }"
               />
+              <p
+                v-if="urlError"
+                class="text-xs text-red-500 mt-1"
+              >
+                {{ urlError }}
+              </p>
             </div>
 
             <div>
@@ -122,8 +154,20 @@ async function testConnection() {
                 type="number"
                 placeholder="123"
                 class="w-full px-3 py-2 border rounded text-sm"
+                :class="{
+                  'border-red-500 focus:ring-red-500': projectIdError,
+                }"
               />
-              <p class="text-xs text-gray-500 mt-1">
+              <p
+                v-if="projectIdError"
+                class="text-xs text-red-500 mt-1"
+              >
+                {{ projectIdError }}
+              </p>
+              <p
+                v-else
+                class="text-xs text-gray-500 mt-1"
+              >
                 Можно найти в настройках проекта GitLab
               </p>
             </div>
@@ -141,7 +185,7 @@ async function testConnection() {
             </div>
 
             <button
-              :disabled="isTesting"
+              :disabled="isTesting || !isValid"
               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50"
               @click="testConnection"
             >
@@ -162,14 +206,6 @@ async function testConnection() {
           </div>
         </template>
       </div>
-    </div>
-    <div class="my-4">
-      <RouterLink
-        to="/side-panel"
-        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50"
-      >
-        Назад
-      </RouterLink>
     </div>
   </div>
 </template>
