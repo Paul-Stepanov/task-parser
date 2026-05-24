@@ -1,17 +1,61 @@
 <script setup lang="ts">
 import { useOptionsStore } from "src/stores/options.store"
+import { useGitLabStore } from "@/stores/gitlab.store"
 import { storeToRefs } from "pinia"
+import { ref } from "vue"
 import { RouterLink } from "vue-router"
 
 const optionsStore = useOptionsStore()
 const { isDark } = storeToRefs(optionsStore)
+
+const gitlabStore = useGitLabStore()
+
+const testResult = ref<{ success: boolean; message: string } | null>(null)
+const isTesting = ref(false)
+
+async function testConnection() {
+  testResult.value = null
+  isTesting.value = true
+
+  const { token, repositoryUrl } = gitlabStore.settings
+
+  if (!token || !repositoryUrl) {
+    testResult.value = {
+      success: false,
+      message: "Заполните токен и URL репозитория",
+    }
+    isTesting.value = false
+    return
+  }
+
+  try {
+    const { createGitLabAPI } = await import("@/utils/gitlab-api")
+    await createGitLabAPI({
+      token,
+      repositoryUrl,
+      projectId: gitlabStore.settings.projectId,
+    })
+    testResult.value = {
+      success: true,
+      message: "Соединение успешно! Токен валиден.",
+    }
+  } catch (error) {
+    testResult.value = {
+      success: false,
+      message: error instanceof Error ? error.message : "Ошибка подключения",
+    }
+  } finally {
+    isTesting.value = false
+  }
+}
 </script>
 
 <template>
   <div class="max-w-xl w-full mx-auto p-8">
-    <h1 class="text-xl font-bold mb-4">Настройки</h1>
+    <h1 class="text-xl font-bold mb-6">Настройки</h1>
 
     <div class="space-y-6">
+      <!-- Интерфейс -->
       <div>
         <h3 class="font-semibold mb-2">Интерфейс</h3>
         <label class="flex items-center gap-2">
@@ -23,13 +67,109 @@ const { isDark } = storeToRefs(optionsStore)
           Тёмная тема
         </label>
       </div>
+
+      <!-- GitLab -->
+      <div>
+        <h3 class="font-semibold mb-2">GitLab интеграция</h3>
+
+        <label class="flex items-center gap-2 mb-4">
+          <input
+            v-model="gitlabStore.settings.enabled"
+            type="checkbox"
+            class="rounded"
+          />
+          Включить GitLab интеграцию
+        </label>
+
+        <template v-if="gitlabStore.settings.enabled">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Personal Access Token
+              </label>
+              <input
+                v-model="gitlabStore.settings.token"
+                type="password"
+                placeholder="glpat-..."
+                class="w-full px-3 py-2 border rounded text-sm"
+              />
+              <p class="text-xs text-gray-500 mt-1">
+                Токен с правами
+                <code>read_api</code>
+                и
+                <code>read_repository</code>
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                URL репозитория
+              </label>
+              <input
+                v-model="gitlabStore.settings.repositoryUrl"
+                type="text"
+                placeholder="https://gitlab.com/group/project"
+                class="w-full px-3 py-2 border rounded text-sm"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Project ID (опционально)
+              </label>
+              <input
+                v-model.number="gitlabStore.settings.projectId"
+                type="number"
+                placeholder="123"
+                class="w-full px-3 py-2 border rounded text-sm"
+              />
+              <p class="text-xs text-gray-500 mt-1">
+                Можно найти в настройках проекта GitLab
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Ветка по умолчанию
+              </label>
+              <input
+                v-model="gitlabStore.settings.defaultBranch"
+                type="text"
+                placeholder="main"
+                class="w-full px-3 py-2 border rounded text-sm"
+              />
+            </div>
+
+            <button
+              :disabled="isTesting"
+              class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50"
+              @click="testConnection"
+            >
+              {{ isTesting ? "Проверка..." : "Проверить подключение" }}
+            </button>
+
+            <div
+              v-if="testResult"
+              :class="[
+                'p-3 rounded text-sm',
+                testResult.success
+                  ? 'bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                  : 'bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+              ]"
+            >
+              {{ testResult.message }}
+            </div>
+          </div>
+        </template>
+      </div>
     </div>
-    <RouterLink to="/side-panel">
-      <button
-        class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+    <div class="my-4">
+      <RouterLink
+        to="/side-panel"
+        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm disabled:opacity-50"
       >
-        Главная
-      </button>
-    </RouterLink>
+        Назад
+      </RouterLink>
+    </div>
   </div>
 </template>
