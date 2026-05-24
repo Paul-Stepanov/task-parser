@@ -28,7 +28,9 @@ async function copyFullPrompt() {
   >
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-semibold">
-        {{ prompt.type === "report" ? "Промпт для отчета" : "Промпт для оценки" }}
+        {{
+          prompt.type === "report" ? "Промпт для отчета" : "Промпт для оценки"
+        }}
       </h3>
       <div class="flex gap-2">
         <button
@@ -51,10 +53,14 @@ async function copyFullPrompt() {
       class="border rounded"
       open
     >
-      <summary class="p-2 cursor-pointer text-sm font-medium bg-blue-50 dark:bg-blue-900/30">
+      <summary
+        class="p-2 cursor-pointer text-sm font-medium bg-blue-50 dark:bg-blue-900/30"
+      >
         System Prompt
       </summary>
-      <div class="p-2 text-xs whitespace-pre-wrap border-t max-h-64 overflow-y-auto">
+      <div
+        class="p-2 text-xs whitespace-pre-wrap border-t max-h-64 overflow-y-auto"
+      >
         {{ prompt.systemPrompt }}
       </div>
     </details>
@@ -63,10 +69,14 @@ async function copyFullPrompt() {
       class="border rounded"
       open
     >
-      <summary class="p-2 cursor-pointer text-sm font-medium bg-green-50 dark:bg-green-900/30">
+      <summary
+        class="p-2 cursor-pointer text-sm font-medium bg-green-50 dark:bg-green-900/30"
+      >
         User Prompt
       </summary>
-      <div class="p-2 text-xs whitespace-pre-wrap border-t max-h-96 overflow-y-auto">
+      <div
+        class="p-2 text-xs whitespace-pre-wrap border-t max-h-96 overflow-y-auto"
+      >
         {{ prompt.userPrompt }}
       </div>
     </details>

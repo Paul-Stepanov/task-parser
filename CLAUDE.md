@@ -40,9 +40,11 @@ Router uses `createWebHashHistory()` — all routes are hash-based.
 ### Build System
 
 Vite config inherits from `vite.config.ts`:
+
 - `vite.chrome.config.ts` — Uses `@crxjs/vite-plugin` for Chrome Manifest V3
 
 The base `vite.config.ts` configures:
+
 - `@vitejs/plugin-vue` — Vue SFC support
 - `vue-router/vite` — file-based routing
 - `@tailwindcss/vite` — Tailwind CSS v4

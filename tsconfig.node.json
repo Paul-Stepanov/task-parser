@@ -13,23 +13,12 @@
     "noEmit": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "~/*": [
-        "./*"
-      ],
-      "src/*": [
-        "./src/*"
-      ],
-      "@assets/*": [
-        "./src/assets/*"
-      ]
+      "@/*": ["./src/*"],
+      "~/*": ["./*"],
+      "src/*": ["./src/*"],
+      "@assets/*": ["./src/assets/*"]
     },
-    "types": [
-      "node",
-      "chrome-types"
-    ]
+    "types": ["node", "chrome-types"]
   },
   "include": [
     "package.json",

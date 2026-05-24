@@ -156,8 +156,7 @@ export default function parseBitrix24Task(): Promise<{
         if (["HTML", "BODY", "HEAD"].includes(el.tagName)) continue
         const text = el.textContent?.trim() || ""
         const id = el.id || ""
-        const className =
-          typeof el.className === "string" ? el.className : ""
+        const className = typeof el.className === "string" ? el.className : ""
 
         if (
           id.includes("task") ||
@@ -181,9 +180,7 @@ export default function parseBitrix24Task(): Promise<{
     }
 
     // Сбор данных из всех табов
-    function collectAllTabData(
-      iframeDoc: Document,
-    ): Record<string, unknown> {
+    function collectAllTabData(iframeDoc: Document): Record<string, unknown> {
       const taskScope = findTaskScope(iframeDoc)
       const taskId = extractTaskId()
       const taskTitle = extractTaskTitle(iframeDoc)
@@ -197,7 +194,10 @@ export default function parseBitrix24Task(): Promise<{
         tabs: {},
       }
 
-      const tabs: Record<string, { content: string; rawContent?: string; elementId?: string }> = {}
+      const tabs: Record<
+        string,
+        { content: string; rawContent?: string; elementId?: string }
+      > = {}
 
       // Описание
       const descSelectors = [
@@ -267,7 +267,9 @@ export default function parseBitrix24Task(): Promise<{
         )
         if (fileItems.length > 0) {
           const files = Array.from(fileItems)
-            .map((el) => el.textContent?.trim() || el.getAttribute("title") || "")
+            .map(
+              (el) => el.textContent?.trim() || el.getAttribute("title") || "",
+            )
             .filter((text) => text.length > 0)
           if (files.length > 0) {
             tabs["Файлы"] = {
@@ -309,7 +311,10 @@ export default function parseBitrix24Task(): Promise<{
           try {
             const iframeDoc =
               taskIframe!.contentDocument ||
-              (taskIframe!.contentWindow?.document as Document | null | undefined)
+              (taskIframe!.contentWindow?.document as
+                | Document
+                | null
+                | undefined)
             if (iframeDoc && iframeDoc.readyState === "complete") {
               checkResolve(iframeDoc)
               return

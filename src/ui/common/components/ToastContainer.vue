@@ -5,7 +5,9 @@ const { toasts } = useToast()
 </script>
 
 <template>
-  <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+  <div
+    class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"
+  >
     <TransitionGroup
       enter-active-class="transition ease-out duration-200"
       enter-from-class="transform translate-y-2 opacity-0"

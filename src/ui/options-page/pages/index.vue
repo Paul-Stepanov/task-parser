@@ -16,8 +16,11 @@ const token = computed(() => gitlabStore.settings.token)
 const repositoryUrl = computed(() => gitlabStore.settings.repositoryUrl)
 const projectId = computed(() => gitlabStore.settings.projectId)
 
-const { tokenError, urlError, projectIdError, isValid } =
-  useGitLabValidation(token, repositoryUrl, projectId)
+const { tokenError, urlError, projectIdError, isValid } = useGitLabValidation(
+  token,
+  repositoryUrl,
+  projectId,
+)
 
 const testResult = ref<{ success: boolean; message: string } | null>(null)
 const isTesting = ref(false)

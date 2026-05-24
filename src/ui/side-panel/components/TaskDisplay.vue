@@ -13,9 +13,7 @@ const task = computed(() => taskStore.currentTask)
   >
     <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded">
       <h3 class="font-semibold text-sm">{{ task.taskTitle }}</h3>
-      <p class="text-xs text-gray-500 mt-1">
-        ID: {{ task.taskId || "N/A" }}
-      </p>
+      <p class="text-xs text-gray-500 mt-1">ID: {{ task.taskId || "N/A" }}</p>
     </div>
 
     <details
@@ -23,7 +21,9 @@ const task = computed(() => taskStore.currentTask)
       :key="name"
       class="border rounded"
     >
-      <summary class="p-2 cursor-pointer text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800">
+      <summary
+        class="p-2 cursor-pointer text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800"
+      >
         {{ name }}
       </summary>
       <div class="p-2 text-xs whitespace-pre-wrap border-t">

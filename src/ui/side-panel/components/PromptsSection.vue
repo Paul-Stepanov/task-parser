@@ -40,7 +40,11 @@ function handleGenerateEstimate() {
       variant="outline"
       @click="toggleAdditionalContext"
     >
-      {{ showAdditionalContext ? "Убрать доп. информацию" : "Добавить доп. информацию" }}
+      {{
+        showAdditionalContext
+          ? "Убрать доп. информацию"
+          : "Добавить доп. информацию"
+      }}
     </BaseButton>
 
     <textarea

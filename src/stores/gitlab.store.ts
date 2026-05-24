@@ -24,8 +24,7 @@ export const useGitLabStore = defineStore("gitlab", () => {
     () => !!(settings.value.token && settings.value.repositoryUrl),
   )
   const hasCommits = computed(
-    () =>
-      commitsData.value !== null && commitsData.value.commits.length > 0,
+    () => commitsData.value !== null && commitsData.value.commits.length > 0,
   )
 
   async function fetchCommits(branch: string, since?: Date) {
@@ -47,9 +46,7 @@ export const useGitLabStore = defineStore("gitlab", () => {
       commitsData.value = await api.getCommitsData(branch, since)
     } catch (error) {
       commitsError.value =
-        error instanceof Error
-          ? error.message
-          : "Ошибка загрузки коммитов"
+        error instanceof Error ? error.message : "Ошибка загрузки коммитов"
     } finally {
       isLoadingCommits.value = false
     }

@@ -3,17 +3,12 @@
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "target": "ESNext",
-    "lib": [
-      "ESNext",
-      "DOM"
-    ],
+    "lib": ["ESNext", "DOM"],
     "useDefineForClassFields": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
-    "types": [
-      "chrome-types"
-    ],
+    "types": ["chrome-types"],
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -21,18 +16,10 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "~/*": [
-        "./*"
-      ],
-      "src/*": [
-        "./src/*"
-      ],
-      "@assets/*": [
-        "./src/assets/*"
-      ]
+      "@/*": ["./src/*"],
+      "~/*": ["./*"],
+      "src/*": ["./src/*"],
+      "@assets/*": ["./src/assets/*"]
     }
   },
   "include": [

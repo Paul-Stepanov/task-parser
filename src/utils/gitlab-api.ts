@@ -9,11 +9,7 @@ export class GitLabAPI {
   private baseUrl: string
   private projectId: number
 
-  constructor(
-    token: string,
-    repositoryUrl: string,
-    projectId?: number,
-  ) {
+  constructor(token: string, repositoryUrl: string, projectId?: number) {
     this.token = token
     this.baseUrl = this.extractBaseUrl(repositoryUrl)
     this.projectId = projectId || this.extractProjectId(repositoryUrl)

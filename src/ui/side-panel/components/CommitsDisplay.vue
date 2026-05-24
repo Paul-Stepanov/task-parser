@@ -12,7 +12,8 @@ const commitsData = computed(() => gitlabStore.commitsData)
     class="space-y-2"
   >
     <div class="p-2 bg-orange-50 dark:bg-orange-900/30 rounded text-sm">
-      <span class="font-medium">Ветка:</span> {{ commitsData.branch }}
+      <span class="font-medium">Ветка:</span>
+      {{ commitsData.branch }}
       <span class="text-gray-500 ml-2">
         ({{ commitsData.totalCount }} коммитов)
       </span>

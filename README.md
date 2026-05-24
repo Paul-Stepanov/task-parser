@@ -1,95 +1,94 @@
-# Vite Vue 3 Browser Extension (Manifest V3)
+# Bitrix24 Task Parser
 
-[![Build Status](https://github.com/mubaidr/vite-vue3-browser-extension-v3/actions/workflows/build.yml/badge.svg)](https://github.com/mubaidr/vite-vue3-browser-extension-v3/actions/workflows/build.yml)
+Browser extension для парсинга задач из Bitrix24 и генерации AI-промптов.
 
-A modern, opinionated starter template for building browser extensions with [Vite](https://vitejs.dev/), [Vue 3](https://vuejs.org/), and Manifest V3. Supports Chrome, Firefox, Edge, and other Chromium-based browsers.
+## Описание
 
-## Features
+Расширение извлекает данные задач из DOM Bitrix24 и генерирует структурированные промпты для AI-ассистентов. Построено на Vue 3 + Vite с использованием Manifest V3 для Chrome.
 
-- **Multi-Context Architecture**: Background script, popup, options page, content script, devtools, side panel, and offscreen pages
-- **File-Based Routing**: Auto-registered UI pages from `src/ui/*/pages`
-- **Vue 3 Ecosystem**: Composition API, Pinia for state management, Vue Router
-- **Rich UI Components**: Nuxt/UI v3, shadcn-vue, Tailwind CSS 4, Lucide icons
-- **TypeScript**: Full type safety with strict TypeScript configuration
-- **i18n Ready**: Internationalization support with vue-i18n
-- **WebExtension Utilities**: `webext-bridge` for cross-context communication, `webextension-polyfill` for browser API compatibility
-- **Developer Experience**: Hot reload, ESLint, Prettier, TypeCheck
-- **AI-Ready**: Includes `AGENTS.md` with coding guidelines for AI assistants
-
-## Quick Start
+## Установка
 
 ```bash
-npx degit mubaidr/vite-vue3-browser-extension-v3 my-webext
-cd my-webext
+git clone https://github.com/Paul-Stepanov/task-parser.git
+cd task-parser
 npm install
-npm run dev
 ```
 
-## Commands
+## Команды
 
-| Command                 | Description                                   |
-| ----------------------- | --------------------------------------------- |
-| `npm run dev`           | Start development for both Chrome and Firefox |
-| `npm run dev:chrome`    | Start development for Chrome                  |
-| `npm run dev:firefox`   | Start development for Firefox                 |
-| `npm run build`         | Build extension for both Chrome and Firefox   |
-| `npm run build:chrome`  | Build extension for Chrome only               |
-| `npm run build:firefox` | Build extension for Firefox only              |
-| `npm run lint`          | Run ESLint with auto-fix                      |
-| `npm run typecheck`     | Run TypeScript type checking                  |
-| `npm run format`        | Format code with Prettier                     |
+| Команда             | Описание                                   |
+| ------------------- | ------------------------------------------ |
+| `npm run dev`       | Dev-сервер для Chrome (HMR, sourcemaps)    |
+| `npm run build`     | Production-сборка для Chrome → dist/chrome |
+| `npm run lint`      | ESLint с авто-исправлением (кешируется)    |
+| `npm run typecheck` | Проверка типов TypeScript                  |
+| `npm run format`    | Форматирование через Prettier              |
+| `npm run launch`    | Запуск Chrome с загруженным расширением    |
 
-## Loading the Extension
+## Архитектура
 
-### Chrome / Edge
+### Контексты расширения
 
-1. Navigate to `chrome://extensions`
-2. Enable **Developer mode** (toggle in top-right)
-3. Click **Load unpacked**
-4. Select the `dist/chrome` folder
+Каждый контекст — изолированное Vue-приложение с собственной точкой входа:
 
-### Firefox
+- **`src/background/`** — Service worker. Открывает side-panel по клику на иконку расширения.
+- **`src/content-script/`** — Внедряется в страницы Bitrix24. Парсит данные задач из DOM.
+- **`src/ui/side-panel/`** — Основной UI. Отображает распаршенную задачу, генерирует AI-промпты.
+- **`src/ui/options-page/`** — Настройки расширения.
+- **`src/ui/common/pages/`** — Общие страницы (404), доступные из всех контекстов.
 
-1. Navigate to `about:debugging#/runtime/this-firefox`
-2. Click **Load Temporary Add-on...**
-3. Select any file in the `dist/firefox` folder
+### Файловая маршрутизация
 
-## Project Structure
+Страницы автоматически регистрируются из `src/ui/<context>/pages/`. Создайте `.vue` файл для нового маршрута. Плагин `vue-router/vite` сканирует все UI-контексты и генерирует типизированные маршруты (`src/types/typed-router.d.ts`).
 
-```
-src/
-├── background/       # Background service worker
-├── components/      # Shared Vue components
-├── composables/     # Vue composables (hooks)
-├── content-script/  # Content scripts
-├── devtools/        # DevTools panel
-├── offscreen/       # Offscreen documents
-├── stores/          # Pinia state stores
-├── ui/              # UI entrypoints (popup, options, etc.)
-│   └── */pages/     # File-based routing pages
-├── types/           # TypeScript definitions
-└── utils/           # Shared utilities
-```
+Маршрутизатор использует `createWebHashHistory()` — все маршруты хеш-базированные.
 
-## Documentation
+### Система сборки
 
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for architecture, design principles, folder structure, and best practices.
+Vite конфиг наследуется от `vite.config.ts`:
 
-## Browser Support
+- `vite.chrome.config.ts` — Использует `@crxjs/vite-plugin` для Chrome Manifest V3
 
-- Chrome (Manifest V3)
-- Firefox (Manifest V2/V3)
-- Edge
-- Other Chromium-based browsers
+Базовый конфиг настраивает:
 
-## Contributing
+- `@vitejs/plugin-vue` — поддержка Vue SFC
+- `vue-router/vite` — файловая маршрутизация
+- `@tailwindcss/vite` — Tailwind CSS v4
+- Build-time константы через `define.config.mjs` (`__VERSION__`, `__NAME__` и т.д.)
 
-Contributions are welcome! Please open issues or submit pull requests for improvements or new features.
+### Управление состоянием
 
-## License
+- **Pinia** stores в `src/stores/`, суффикс: `*.store.ts`, стиль Composition API
+- **`useBrowserSyncStorage`** / **`useBrowserLocalStorage`** — реактивные refs, синхронизированные с `chrome.storage`
+- **`useTheme`** — тёмная/светлая тема с персистентностью
+
+### Коммуникация
+
+- `chrome.runtime.sendMessage` / `chrome.tabs.sendMessage` для обмена между контекстами
+- Side Panel использует `chrome.scripting.executeScript` для парсинга содержимого страницы
+
+## Загрузка расширения в Chrome
+
+1. Перейдите в `chrome://extensions`
+2. Включите **Режим разработчика** (toggle вверху справа)
+3. Нажмите **Загрузить распакованное расширение**
+4. Выберите папку `dist/chrome`
+
+## Кодстайл
+
+- **Без точек с запятой**, двойные кавычки, висящие запятые, отступ 2 пробела
+- **Vue SFC**: только `<script setup lang="ts">`
+- **TypeScript**: strict mode, избегать `any`
+- **Консоль**: используйте `console.info`, `console.warn`, `console.error`
+- **Явные импорты**: Vue-функции, Pinia, vue-router — должны быть импортированы явно
+- **Алиасы путей**: `@/` → `src/`, `~/` → корень проекта
+
+## Перед коммитом
+
+1. `npm run lint` — ноль ошибок
+2. `npm run typecheck` — без ошибок типов
+3. Протестировать в Chrome (загрузить `dist/chrome` как распакованное расширение)
+
+## Лицензия
 
 MIT
-
-## Support
-
-If you find this project useful, please consider [supporting the author](https://www.patreon.com/c/mubaidr) and starring ⭐ the repository.

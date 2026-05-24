@@ -72,16 +72,13 @@ function useBrowserStorage<T>(
   })
 
   // Watch for changes in the storage and update chrome.storage (debounced)
-  const debouncedWrite = debounce(
-    (newValue: T) => {
-      if (checkType(defaultValue, newValue)) {
-        chrome.storage[storageType].set({ [key]: toRaw(newValue) })
-      } else {
-        console.error("not updating " + key + ": type mismatch")
-      }
-    },
-    500,
-  )
+  const debouncedWrite = debounce((newValue: T) => {
+    if (checkType(defaultValue, newValue)) {
+      chrome.storage[storageType].set({ [key]: toRaw(newValue) })
+    } else {
+      console.error("not updating " + key + ": type mismatch")
+    }
+  }, 500)
 
   watch(
     data,
