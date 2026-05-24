@@ -235,25 +235,6 @@ export default function parseBitrix24Task(): Promise<{
         }
       }
 
-      // История
-      const historySelectors = [
-        "#task-log-block",
-        "#task-log-table",
-        '[id*="log"]',
-        '[class*="history"]',
-      ]
-      const historyEl = findEl(taskScope, historySelectors)
-      if (historyEl) {
-        const content = extractTextContent(historyEl)
-        if (content.length > 10) {
-          tabs["История"] = {
-            content,
-            rawContent: historyEl.innerHTML.substring(0, 10000),
-            elementId: historyEl.id,
-          }
-        }
-      }
-
       // Время
       const timeSelectors = [
         "#task-time-block",
@@ -269,23 +250,6 @@ export default function parseBitrix24Task(): Promise<{
             content,
             rawContent: timeEl.innerHTML.substring(0, 10000),
             elementId: timeEl.id,
-          }
-        }
-      }
-
-      // Планирование
-      const planSelectors = [
-        "#task-executor-block",
-        '[class*="executor"]',
-        '[class*="plan"]',
-      ]
-      const planEl = findEl(taskScope, planSelectors)
-      if (planEl) {
-        const content = extractTextContent(planEl)
-        if (content.length > 5) {
-          tabs["Планирование"] = {
-            content,
-            rawContent: planEl.innerHTML.substring(0, 10000),
           }
         }
       }
@@ -318,37 +282,6 @@ export default function parseBitrix24Task(): Promise<{
               content,
               rawContent: filesEl.innerHTML.substring(0, 10000),
             }
-          }
-        }
-      }
-
-      // Информация из сайдбара
-      const sidebarSelectors = [
-        ".task-iframe-sidebar",
-        ".task-detail-sidebar",
-        '[class*="sidebar"]',
-      ]
-      const sidebarEl = findEl(taskScope, sidebarSelectors)
-      if (sidebarEl) {
-        const info: string[] = []
-        const statusEl = sidebarEl.querySelector(
-          '[class*="status"], [id*="status"]',
-        )
-        if (statusEl) info.push(`Статус: ${extractTextContent(statusEl)}`)
-        const deadlineEl = sidebarEl.querySelector(
-          '[class*="deadline"], [id*="deadline"]',
-        )
-        if (deadlineEl)
-          info.push(`Срок: ${extractTextContent(deadlineEl)}`)
-        const authorEl = sidebarEl.querySelector(
-          '[class*="author"], [class*="creator"]',
-        )
-        if (authorEl)
-          info.push(`Автор: ${extractTextContent(authorEl)}`)
-        if (info.length > 0) {
-          tabs["Информация"] = {
-            content: info.join("\n"),
-            rawContent: sidebarEl.innerHTML.substring(0, 5000),
           }
         }
       }

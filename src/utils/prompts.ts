@@ -59,7 +59,6 @@ export function createReportUserPrompt(
 
   prompt += `**ID ЗАДАЧИ:** ${taskData.taskId || "N/A"}\n`
   prompt += `**ЗАГОЛОВОК:** ${taskData.taskTitle || taskData.title || "Без заголовка"}\n`
-  prompt += `**URL ЗАДАЧИ:** ${taskData.url || "N/A"}\n`
   prompt += `**ДАТА ПАРСИНГА:** ${new Date(taskData.timestamp).toLocaleString("ru-RU")}\n\n`
 
   if (taskData.tabs && Object.keys(taskData.tabs).length > 0) {
@@ -116,8 +115,6 @@ export function createEstimateUserPrompt(taskData: Bitrix24TaskData): string {
 
   prompt += `**ID ЗАДАЧИ:** ${taskData.taskId || "N/A"}\n`
   prompt += `**ЗАГОЛОВОК:** ${taskData.taskTitle || taskData.title || "Без заголовка"}\n`
-  prompt += `**URL ЗАДАЧИ:** ${taskData.url || "N/A"}\n\n`
-
   if (taskData.tabs) {
     prompt += `**ДАННЫЕ ЗАДАЧИ:**\n\n`
 
