@@ -8,7 +8,7 @@ import ToastContainer from "@/ui/common/components/ToastContainer.vue"
   <div
     class="flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
   >
-    <AppHeader :is-options-page="false" />
+    <AppHeader />
     <main class="flex-1">
       <RouterView />
     </main>

@@ -6,7 +6,7 @@ const { toasts } = useToast()
 
 <template>
   <div class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
-    <Transition
+    <TransitionGroup
       enter-active-class="transition ease-out duration-200"
       enter-from-class="transform translate-y-2 opacity-0"
       enter-to-class="transform translate-y-0 opacity-100"
@@ -26,6 +26,6 @@ const { toasts } = useToast()
       >
         {{ toast.message }}
       </div>
-    </Transition>
+    </TransitionGroup>
   </div>
 </template>

@@ -89,6 +89,7 @@ export default defineConfig({
 
   server: {
     port: PORT,
+    cors: true,
     hmr: {
       host: "localhost",
       port: PORT,
