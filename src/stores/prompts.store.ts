@@ -13,6 +13,7 @@ import {
 export const usePromptsStore = defineStore("prompts", () => {
   const currentPrompt = ref<GeneratedPrompt | null>(null)
   const error = ref<string | null>(null)
+  const additionalContext = ref("")
 
   function generateReportPrompt(
     taskData: Bitrix24TaskData,
@@ -24,7 +25,11 @@ export const usePromptsStore = defineStore("prompts", () => {
       currentPrompt.value = {
         type: "report",
         systemPrompt: createReportSystemPrompt(),
-        userPrompt: createReportUserPrompt(taskData, commitsData),
+        userPrompt: createReportUserPrompt(
+          taskData,
+          commitsData,
+          additionalContext.value,
+        ),
         timestamp: new Date().toISOString(),
         taskId: taskData.taskId || "",
       }
@@ -41,7 +46,7 @@ export const usePromptsStore = defineStore("prompts", () => {
       currentPrompt.value = {
         type: "estimate",
         systemPrompt: createEstimateSystemPrompt(),
-        userPrompt: createEstimateUserPrompt(taskData),
+        userPrompt: createEstimateUserPrompt(taskData, additionalContext.value),
         timestamp: new Date().toISOString(),
         taskId: taskData.taskId || "",
       }
@@ -59,6 +64,7 @@ export const usePromptsStore = defineStore("prompts", () => {
   return {
     currentPrompt,
     error,
+    additionalContext,
     generateReportPrompt,
     generateEstimatePrompt,
     clearPrompt,

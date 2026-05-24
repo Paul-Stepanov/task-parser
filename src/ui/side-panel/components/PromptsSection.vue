@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from "vue"
 import BaseButton from "@/ui/common/components/BaseButton.vue"
 import { useTaskStore } from "@/stores/task.store"
 import { usePromptsStore } from "@/stores/prompts.store"
@@ -8,6 +9,15 @@ import PromptPreview from "./PromptPreview.vue"
 const taskStore = useTaskStore()
 const promptsStore = usePromptsStore()
 const gitlabStore = useGitLabStore()
+
+const showAdditionalContext = ref(false)
+
+function toggleAdditionalContext() {
+  showAdditionalContext.value = !showAdditionalContext.value
+  if (!showAdditionalContext.value) {
+    promptsStore.additionalContext = ""
+  }
+}
 
 function handleGenerateReport() {
   if (!taskStore.currentTask) return
@@ -25,6 +35,22 @@ function handleGenerateEstimate() {
 
 <template>
   <section class="space-y-2">
+    <BaseButton
+      class="w-full"
+      variant="outline"
+      @click="toggleAdditionalContext"
+    >
+      {{ showAdditionalContext ? "Убрать доп. информацию" : "Добавить доп. информацию" }}
+    </BaseButton>
+
+    <textarea
+      v-if="showAdditionalContext"
+      v-model="promptsStore.additionalContext"
+      class="w-full rounded border border-gray-300 bg-white p-2 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+      rows="3"
+      placeholder="Введите дополнительную информацию для промпта..."
+    />
+
     <BaseButton
       class="w-full"
       variant="success"

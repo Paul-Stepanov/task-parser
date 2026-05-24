@@ -54,6 +54,7 @@ export function createReportSystemPrompt(): string {
 export function createReportUserPrompt(
   taskData: Bitrix24TaskData,
   commitsData?: GitLabCommitsData | null,
+  additionalContext?: string,
 ): string {
   let prompt = `Создайте отчет для заказчика на основе следующих данных задачи Битрикс24:\n\n`
 
@@ -82,7 +83,11 @@ export function createReportUserPrompt(
     }
   }
 
-  prompt += `\n**ЗАДАНИЕ:** На основе этих данных создайте подробный, структурированный отчет для заказчика о выполненных работах. Если предоставлена информация о коммитах, используйте её для более детального описания технических правок в коде. Применяйте все правила оформления указанные в системном промпте (только <ul> и <li> теги, причастия в краткой форме, деловой стиль).`
+  if (additionalContext?.trim()) {
+    prompt += `**ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ:**\n${additionalContext.trim()}\n\n`
+  }
+
+  prompt += `**ЗАДАНИЕ:** На основе этих данных создайте подробный, структурированный отчет для заказчика о выполненных работах. Если предоставлена информация о коммитах, используйте её для более детального описания технических правок в коде. Применяйте все правила оформления указанные в системном промпте (только <ul> и <li> теги, причастия в краткой форме, деловой стиль).`
 
   return prompt
 }
@@ -110,7 +115,10 @@ export function createEstimateSystemPrompt(): string {
 - Если данных недостаточно - явно укажи, что нужно уточнить`
 }
 
-export function createEstimateUserPrompt(taskData: Bitrix24TaskData): string {
+export function createEstimateUserPrompt(
+  taskData: Bitrix24TaskData,
+  additionalContext?: string,
+): string {
   let prompt = `Оцените трудозатраты для реализации следующей задачи Битрикс24:\n\n`
 
   prompt += `**ID ЗАДАЧИ:** ${taskData.taskId || "N/A"}\n`
@@ -122,6 +130,10 @@ export function createEstimateUserPrompt(taskData: Bitrix24TaskData): string {
       prompt += `--- ${tabName.toUpperCase()} ---\n`
       prompt += `${tabData.content || "Нет данных"}\n\n`
     }
+  }
+
+  if (additionalContext?.trim()) {
+    prompt += `**ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ:**\n${additionalContext.trim()}\n\n`
   }
 
   prompt += `**ЗАДАНИЕ:** Проанализируйте задачу и дайте обоснованную оценку времени реализации.`
