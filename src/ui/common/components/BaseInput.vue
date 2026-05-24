@@ -3,7 +3,7 @@ import { computed } from "vue"
 
 const props = withDefaults(
   defineProps<{
-    modelValue: string | number
+    modelValue: string | number | undefined
     type?: "text" | "password" | "email" | "number" | "url"
     placeholder?: string
     disabled?: boolean

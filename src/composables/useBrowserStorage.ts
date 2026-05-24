@@ -94,8 +94,26 @@ function useBrowserStorage<T>(
   chrome.storage[storageType].onChanged.addListener(async function (changes) {
     if (changes?.[key]) {
       isUpdatingFromStorage = true
-      const { oldValue, newValue } = changes[key]
-      data.value = newValue
+      const { newValue } = changes[key]
+      if (defaultIsObject && isObject(newValue) && isObject(data.value)) {
+        const merged = mergeDeep(defaultValue, newValue)
+        const current = data.value as Record<string, any>
+        const target = merged as Record<string, any>
+
+        Object.keys(target).forEach((k) => {
+          if (current[k] !== target[k]) {
+            current[k] = target[k]
+          }
+        })
+
+        Object.keys(current).forEach((k) => {
+          if (!(k in target)) {
+            delete current[k]
+          }
+        })
+      } else {
+        data.value = newValue
+      }
       await nextTick()
       isUpdatingFromStorage = false
     }

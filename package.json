@@ -1,5 +1,5 @@
 {
-  "description": "A Vue 3 + Vite project for building Chrome extensions",
+  "description": "Browser extension for parsing Bitrix24 tasks and generating AI prompts",
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.3.0",
     "@eslint/compat": "^2.0.2",

@@ -1,28 +1,17 @@
 import type {
   GitLabCommit,
   GitLabCommitsData,
-  GitLabRepository,
+  GitLabGroup,
+  GitLabProject,
 } from "@/types/gitlab"
 
 export class GitLabAPI {
   private token: string
   private baseUrl: string
-  private projectId: number
 
-  constructor(token: string, repositoryUrl: string, projectId?: number) {
+  constructor(token: string, baseUrl: string) {
     this.token = token
-    this.baseUrl = this.extractBaseUrl(repositoryUrl)
-    this.projectId = projectId || this.extractProjectId(repositoryUrl)
-  }
-
-  private extractBaseUrl(url: string): string {
-    const match = url.match(/https?:\/\/([^/]+)/)
-    return match ? `https://${match[1]}` : "https://gitlab.com"
-  }
-
-  private extractProjectId(url: string): number {
-    const match = url.match(/\/projects\/(\d+)/)
-    return match ? parseInt(match[1], 10) : 0
+    this.baseUrl = baseUrl.replace(/\/+$/, "")
   }
 
   private getHeaders(): HeadersInit {
@@ -32,25 +21,13 @@ export class GitLabAPI {
     }
   }
 
-  async getCommitsByBranch(
-    branch: string,
-    since?: Date,
-  ): Promise<GitLabCommit[]> {
-    const url = new URL(
-      `${this.baseUrl}/api/v4/projects/${this.projectId}/repository/commits`,
-    )
-    url.searchParams.set("ref_name", branch)
-
-    if (since) {
-      url.searchParams.set("since", since.toISOString())
-    }
-
-    const allCommits: GitLabCommit[] = []
+  private async fetchAllPages<T>(url: URL): Promise<T[]> {
+    const items: T[] = []
     let page = 1
-    let hasMore = true
 
-    while (hasMore && page <= 10) {
+    while (true) {
       url.searchParams.set("page", page.toString())
+      url.searchParams.set("per_page", "100")
 
       const response = await fetch(url.toString(), {
         headers: this.getHeaders(),
@@ -62,29 +39,70 @@ export class GitLabAPI {
         )
       }
 
-      const commits: GitLabCommit[] = await response.json()
-      allCommits.push(...commits)
+      const pageItems: T[] = await response.json()
 
-      hasMore = commits.length > 0 && commits.length === 20
+      if (pageItems.length === 0) break
+
+      items.push(...pageItems)
       page++
     }
 
-    return allCommits
+    return items
+  }
+
+  async getGroups(): Promise<GitLabGroup[]> {
+    const url = new URL(`${this.baseUrl}/api/v4/groups`)
+    url.searchParams.set("per_page", "100")
+    url.searchParams.set("all_available", "false")
+    url.searchParams.set("order_by", "name")
+
+    return this.fetchAllPages<GitLabGroup>(url)
+  }
+
+  async getProjectsByGroup(groupId: number): Promise<GitLabProject[]> {
+    const url = new URL(
+      `${this.baseUrl}/api/v4/groups/${groupId}/projects`,
+    )
+    url.searchParams.set("per_page", "100")
+    url.searchParams.set("include_subgroups", "true")
+    url.searchParams.set("order_by", "name")
+    url.searchParams.set("sort", "asc")
+
+    return this.fetchAllPages<GitLabProject>(url)
+  }
+
+  async getCommitsByBranch(
+    projectId: number,
+    branch: string,
+    since?: Date,
+  ): Promise<GitLabCommit[]> {
+    const url = new URL(
+      `${this.baseUrl}/api/v4/projects/${projectId}/repository/commits`,
+    )
+    url.searchParams.set("ref_name", branch)
+    url.searchParams.set("per_page", "100")
+
+    if (since) {
+      url.searchParams.set("since", since.toISOString())
+    }
+
+    return this.fetchAllPages<GitLabCommit>(url)
   }
 
   async getCommitsData(
+    projectId: number,
     branch: string,
     since?: Date,
   ): Promise<GitLabCommitsData> {
-    const commits = await this.getCommitsByBranch(branch, since)
+    const commits = await this.getCommitsByBranch(projectId, branch, since)
 
     return {
       commits,
       commitsText: this.formatCommitsText(commits),
       branch,
       repository: {
-        url: `${this.baseUrl}/${this.projectId}`,
-        projectId: this.projectId,
+        url: `${this.baseUrl}/${projectId}`,
+        projectId,
       },
       fetchedAt: new Date().toISOString(),
       totalCount: commits.length,
@@ -114,14 +132,9 @@ export class GitLabAPI {
 
 export async function createGitLabAPI(settings: {
   token: string
-  repositoryUrl: string
-  projectId?: number
+  gitlabUrl: string
 }): Promise<GitLabAPI> {
-  const api = new GitLabAPI(
-    settings.token,
-    settings.repositoryUrl,
-    settings.projectId,
-  )
+  const api = new GitLabAPI(settings.token, settings.gitlabUrl)
 
   const isValid = await api.validateToken()
   if (!isValid) {
