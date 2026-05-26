@@ -1,21 +1,12 @@
 <script setup lang="ts">
 import BaseButton from "@/ui/common/components/BaseButton.vue"
 import BaseInput from "@/ui/common/components/BaseInput.vue"
-import { ref, watch } from "vue"
+import { ref } from "vue"
 import { useGitLabStore } from "@/stores/gitlab.store"
 import CommitsDisplay from "./CommitsDisplay.vue"
 
 const gitlabStore = useGitLabStore()
-const branchInput = ref(gitlabStore.settings.defaultBranch || "")
-
-watch(
-  () => gitlabStore.settings.defaultBranch,
-  (newBranch) => {
-    if (newBranch && !branchInput.value) {
-      branchInput.value = newBranch
-    }
-  },
-)
+const branchInput = ref("")
 
 async function handleFetchCommits() {
   if (!branchInput.value.trim()) return
