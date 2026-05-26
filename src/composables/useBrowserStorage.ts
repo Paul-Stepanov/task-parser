@@ -17,7 +17,13 @@ function mergeDeep(defaults: any, source: any): any {
     } else {
       // If the type is different, use the default value
       output[key] = defaultValue
-      console.warn("Type mismatch", key, sourceValue)
+      // Only warn for actual type mismatches, not number/string conversion
+      const isNumberStringConversion =
+        (typeof sourceValue === "number" && typeof defaultValue === "string") ||
+        (typeof sourceValue === "string" && typeof defaultValue === "number")
+      if (!isNumberStringConversion) {
+        console.warn("Type mismatch", key, sourceValue, "(expected", typeof defaultValue, ")")
+      }
     }
   })
 
@@ -26,12 +32,18 @@ function mergeDeep(defaults: any, source: any): any {
 
 function checkType(defaultValue: any, value: any): boolean {
   // Check if the value type is the same type as the default value or null
-  // there are only strings, booleans, nulls and arrays as types left
-  return (
-    (typeof value === typeof defaultValue &&
-      Array.isArray(value) == Array.isArray(defaultValue)) ||
-    value === null
-  )
+  // Chrome storage stores numbers as strings, so we allow number <-> string conversion
+  const isNullOrUndefined = value === null || value === undefined
+  const isStrictTypeMatch =
+    typeof value === typeof defaultValue &&
+    Array.isArray(value) == Array.isArray(defaultValue)
+
+  // Allow number <-> string conversion (chrome.storage limitation)
+  const isNumberStringConversion =
+    (typeof value === "number" && typeof defaultValue === "string") ||
+    (typeof value === "string" && typeof defaultValue === "number")
+
+  return isNullOrUndefined || isStrictTypeMatch || isNumberStringConversion
 }
 
 function isObject(value: any): boolean {
