@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import BaseInput from "@/ui/common/components/BaseInput.vue"
 import BaseSelect from "@/ui/common/components/BaseSelect.vue"
-import { useOptionsStore } from "src/stores/options.store"
 import { useGitLabStore } from "@/stores/gitlab.store"
 import { useGitLabValidation } from "@/composables/useGitLabValidation"
 import { useToast } from "@/composables/useToast"
-import { storeToRefs } from "pinia"
 import { computed, ref } from "vue"
-
-const optionsStore = useOptionsStore()
-const { isDark } = storeToRefs(optionsStore)
 
 const gitlabStore = useGitLabStore()
 const { success, error: showError } = useToast()
@@ -43,9 +38,7 @@ const hasCredentials = computed(
     isValid.value,
 )
 
-const isFullyConfigured = computed(
-  () => gitlabStore.isConfigured && gitlabStore.settings.defaultBranch,
-)
+const isFullyConfigured = computed(() => gitlabStore.isConfigured)
 
 async function testConnection() {
   testResult.value = null
@@ -114,18 +107,6 @@ function handleProjectChange(value: string | number | undefined) {
     <h1 class="text-xl font-bold mb-6">Настройки</h1>
 
     <div class="space-y-6">
-      <div>
-        <h3 class="font-semibold mb-2">Интерфейс</h3>
-        <label class="flex items-center gap-2">
-          <input
-            v-model="isDark"
-            type="checkbox"
-            class="rounded"
-          />
-          Тёмная тема
-        </label>
-      </div>
-
       <div>
         <h3 class="font-semibold mb-2">GitLab интеграция</h3>
 
@@ -246,26 +227,20 @@ function handleProjectChange(value: string | number | undefined) {
                     </p>
                   </div>
 
-                  <div v-if="gitlabStore.settings.projectId">
-                    <label class="block text-sm font-medium mb-1">
-                      Ветка по умолчанию
-                    </label>
-                    <BaseInput
-                      v-model="gitlabStore.settings.defaultBranch"
-                      type="text"
-                      placeholder="main"
-                    />
-                    <p class="text-xs text-gray-500 mt-1">
-                      Автоматически подставляется при загрузке коммитов
-                    </p>
-                  </div>
-
                   <div
                     v-if="isFullyConfigured"
-                    class="p-3 rounded text-sm bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                    class="flex items-center justify-between p-3 rounded text-sm bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300"
                   >
-                    Настройка завершена: {{ gitlabStore.settings.groupName }} /
-                    {{ gitlabStore.settings.projectName }}
+                    <span>
+                      Настройка завершена: {{ gitlabStore.settings.groupName }} /
+                      {{ gitlabStore.settings.projectName }}
+                    </span>
+                    <RouterLink
+                      to="/side-panel"
+                      class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs"
+                    >
+                      ОК
+                    </RouterLink>
                   </div>
                 </div>
               </div>

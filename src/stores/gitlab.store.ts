@@ -19,7 +19,7 @@ export const useGitLabStore = defineStore("gitlab", () => {
       groupName: undefined,
       projectId: undefined,
       projectName: undefined,
-      defaultBranch: "master",
+      defaultBranch: "",
       enabled: false,
     },
   )

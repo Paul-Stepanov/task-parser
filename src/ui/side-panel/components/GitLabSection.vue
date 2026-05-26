@@ -29,7 +29,7 @@ async function handleFetchCommits() {
     class="space-y-3 p-3 border rounded"
   >
     <h3 class="text-sm font-medium">
-      GitLab коммиты
+      GitLab коммиты слитой ветки
       <span
         v-if="gitlabStore.settings.projectName"
         class="text-gray-500 font-normal"
