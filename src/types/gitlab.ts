@@ -44,6 +44,7 @@ export interface GitLabCommitsData {
   repository: GitLabRepository
   fetchedAt: string
   totalCount: number
+  mergeRequestUrl?: string
 }
 
 export interface GitLabSettings {

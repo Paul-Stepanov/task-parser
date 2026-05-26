@@ -71,42 +71,91 @@ export class GitLabAPI {
     return this.fetchAllPages<GitLabProject>(url)
   }
 
-  async getCommitsByBranch(
-    projectId: number,
-    branch: string,
-    since?: Date,
-  ): Promise<GitLabCommit[]> {
-    const url = new URL(
-      `${this.baseUrl}/api/v4/projects/${projectId}/repository/commits`,
-    )
-    url.searchParams.set("ref_name", branch)
-    url.searchParams.set("per_page", "100")
-
-    if (since) {
-      url.searchParams.set("since", since.toISOString())
-    }
-
-    return this.fetchAllPages<GitLabCommit>(url)
-  }
-
   async getCommitsData(
     projectId: number,
     branch: string,
-    since?: Date,
   ): Promise<GitLabCommitsData> {
-    const commits = await this.getCommitsByBranch(projectId, branch, since)
+    const mergeRequests = await this.findMergeRequests(projectId, branch)
+
+    if (mergeRequests.length === 0) {
+      throw new Error(
+        `Merge Request для ветки "${branch}" не найден`,
+      )
+    }
+
+    const allCommits = await this.collectCommitsFromMergeRequests(
+      projectId,
+      mergeRequests,
+    )
 
     return {
-      commits,
-      commitsText: this.formatCommitsText(commits),
+      commits: allCommits,
+      commitsText: this.formatCommitsText(allCommits),
       branch,
       repository: {
         url: `${this.baseUrl}/${projectId}`,
         projectId,
       },
       fetchedAt: new Date().toISOString(),
-      totalCount: commits.length,
+      totalCount: allCommits.length,
+      mergeRequestUrl: mergeRequests[0].web_url,
     }
+  }
+
+  private async findMergeRequests(
+    projectId: number,
+    sourceBranch: string,
+  ): Promise<{ iid: number; web_url: string }[]> {
+    const url = new URL(
+      `${this.baseUrl}/api/v4/projects/${projectId}/merge_requests`,
+    )
+    url.searchParams.set("source_branch", sourceBranch)
+    url.searchParams.set("order_by", "updated_at")
+    url.searchParams.set("sort", "desc")
+
+    const response = await fetch(url.toString(), {
+      headers: this.getHeaders(),
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `GitLab API error: ${response.status} ${response.statusText}`,
+      )
+    }
+
+    return response.json()
+  }
+
+  private async collectCommitsFromMergeRequests(
+    projectId: number,
+    mergeRequests: { iid: number }[],
+  ): Promise<GitLabCommit[]> {
+    const seen = new Set<string>()
+    const commits: GitLabCommit[] = []
+
+    for (const mr of mergeRequests) {
+      const mrCommits = await this.getMergeRequestCommits(projectId, mr.iid)
+
+      for (const commit of mrCommits) {
+        if (!seen.has(commit.id)) {
+          seen.add(commit.id)
+          commits.push(commit)
+        }
+      }
+    }
+
+    return commits
+  }
+
+  private async getMergeRequestCommits(
+    projectId: number,
+    mergeRequestIid: number,
+  ): Promise<GitLabCommit[]> {
+    const url = new URL(
+      `${this.baseUrl}/api/v4/projects/${projectId}/merge_requests/${mergeRequestIid}/commits`,
+    )
+
+    return this.fetchAllPages<GitLabCommit>(url)
   }
 
   private formatCommitsText(commits: GitLabCommit[]): string {

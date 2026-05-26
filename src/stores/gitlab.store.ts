@@ -117,7 +117,7 @@ export const useGitLabStore = defineStore("gitlab", () => {
     settings.value.projectName = undefined
   }
 
-  async function fetchCommits(branch: string, since?: Date) {
+  async function fetchCommits(branch: string) {
     if (!isConfigured.value) {
       commitsError.value = "GitLab не настроен. Проверьте настройки."
       return
@@ -135,7 +135,6 @@ export const useGitLabStore = defineStore("gitlab", () => {
       commitsData.value = await api.getCommitsData(
         settings.value.projectId!,
         branch,
-        since,
       )
     } catch (error) {
       commitsError.value =
