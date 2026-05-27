@@ -33,6 +33,10 @@ function mergeDeep(defaults: any, source: any): any {
 function checkType(defaultValue: any, value: any): boolean {
   // Check if the value type is the same type as the default value or null
   // Chrome storage stores numbers as strings, so we allow number <-> string conversion
+
+  // IMPORTANT: Allow overriding undefined default with any real value from storage
+  // This fixes the issue where stored data from previous sessions gets rejected
+  const isDefaultUndefined = defaultValue === undefined
   const isNullOrUndefined = value === null || value === undefined
   const isStrictTypeMatch =
     typeof value === typeof defaultValue &&
@@ -43,7 +47,7 @@ function checkType(defaultValue: any, value: any): boolean {
     (typeof value === "number" && typeof defaultValue === "string") ||
     (typeof value === "string" && typeof defaultValue === "number")
 
-  return isNullOrUndefined || isStrictTypeMatch || isNumberStringConversion
+  return isDefaultUndefined || isNullOrUndefined || isStrictTypeMatch || isNumberStringConversion
 }
 
 function isObject(value: any): boolean {
