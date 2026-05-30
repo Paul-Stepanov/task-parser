@@ -129,7 +129,8 @@ export default function parseBitrix24Task(): Promise<{
         }
       }
 
-      return `Задача #${extractTaskId()}`
+      const taskId = extractTaskId()
+      return taskId ? `Задача #${taskId}` : "Задача"
     }
 
     // Поиск контейнера задачи в iframe

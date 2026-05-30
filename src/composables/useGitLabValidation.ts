@@ -43,7 +43,11 @@ export function useGitLabValidation(
   })
 
   const isValid = computed(
-    () => !tokenError.value && !urlError.value,
+    () =>
+      !!token.value &&
+      !!gitlabUrl.value &&
+      !tokenError.value &&
+      !urlError.value,
   )
 
   return {

@@ -39,7 +39,7 @@ const classes = computed(() => {
 function onInput(event: Event) {
   const target = event.target as HTMLInputElement
   if (props.type === "number") {
-    emit("update:modelValue", target.valueAsNumber || "")
+    emit("update:modelValue", target.valueAsNumber ?? "")
   } else {
     emit("update:modelValue", target.value)
   }

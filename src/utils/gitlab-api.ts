@@ -76,6 +76,7 @@ export class GitLabAPI {
     projectId: number,
     branch: string,
   ): Promise<GitLabCommitsData> {
+    const project = await this.getProject(projectId)
     const mergeRequests = await this.findMergeRequests(projectId, branch)
 
     if (mergeRequests.length === 0) {
@@ -94,13 +95,33 @@ export class GitLabAPI {
       commitsText: this.formatCommitsText(allCommits),
       branch,
       repository: {
-        url: `${this.baseUrl}/${projectId}`,
+        url: project.web_url,
         projectId,
       },
       fetchedAt: new Date().toISOString(),
       totalCount: allCommits.length,
       mergeRequestUrl: mergeRequests[0].web_url,
     }
+  }
+
+  private async getProject(
+    projectId: number,
+  ): Promise<GitLabProject> {
+    const url = new URL(
+      `${this.baseUrl}/api/v4/projects/${projectId}`,
+    )
+
+    const response = await fetch(url.toString(), {
+      headers: this.getHeaders(),
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `GitLab API error: ${response.status} ${response.statusText}`,
+      )
+    }
+
+    return response.json()
   }
 
   private async findMergeRequests(

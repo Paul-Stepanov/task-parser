@@ -25,6 +25,7 @@ export const useGitLabStore = defineStore("gitlab", () => {
   )
 
   const apiInstance = shallowRef<GitLabAPI | null>(null)
+  let initPromise: Promise<GitLabAPI> | null = null
 
   const groups = ref<GitLabGroup[]>([])
   const projects = ref<GitLabProject[]>([])
@@ -49,17 +50,34 @@ export const useGitLabStore = defineStore("gitlab", () => {
     () => [settings.value.token, settings.value.gitlabUrl],
     () => {
       apiInstance.value = null
+      initPromise = null
+      groups.value = []
+      projects.value = []
+      commitsData.value = null
+      groupsError.value = null
+      projectsError.value = null
+      commitsError.value = null
+      settings.value.groupId = undefined
+      settings.value.groupName = undefined
+      settings.value.projectId = undefined
+      settings.value.projectName = undefined
     },
   )
 
   async function getAPI(): Promise<GitLabAPI> {
-    if (!apiInstance.value) {
-      apiInstance.value = await createGitLabAPI({
+    if (apiInstance.value) return apiInstance.value
+
+    if (!initPromise) {
+      initPromise = createGitLabAPI({
         token: settings.value.token,
         gitlabUrl: settings.value.gitlabUrl,
+      }).then((api) => {
+        apiInstance.value = api
+        return api
       })
     }
-    return apiInstance.value!
+
+    return initPromise
   }
 
   async function loadGroups() {
@@ -103,6 +121,7 @@ export const useGitLabStore = defineStore("gitlab", () => {
     settings.value.projectId = undefined
     settings.value.projectName = undefined
     projects.value = []
+    clearCommits()
   }
 
   function selectProject(projectId: number) {
@@ -113,6 +132,8 @@ export const useGitLabStore = defineStore("gitlab", () => {
     if (project?.default_branch) {
       settings.value.defaultBranch = project.default_branch
     }
+
+    clearCommits()
   }
 
   function clearGroupSelection() {

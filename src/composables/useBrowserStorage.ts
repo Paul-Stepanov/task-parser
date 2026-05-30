@@ -92,6 +92,14 @@ function useBrowserStorage<T>(
     }
   }, 500)
 
+  function flush() {
+    debouncedWrite.flush()
+  }
+
+  if (typeof window !== "undefined") {
+    window.addEventListener("beforeunload", flush)
+  }
+
   watch(
     data,
     (newValue) => {

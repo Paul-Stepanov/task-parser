@@ -5,19 +5,23 @@ import { computed, ref } from "vue"
 import BaseButton from "@/ui/common/components/BaseButton.vue"
 
 const promptsStore = usePromptsStore()
-const { success } = useToast()
+const { success, error: showError } = useToast()
 const prompt = computed(() => promptsStore.currentPrompt)
 
 const showSystem = ref(false)
 const justCopied = ref(false)
 
 async function copyToClipboard(text: string) {
-  await navigator.clipboard.writeText(text)
-  justCopied.value = true
-  success("Скопировано в буфер обмена")
-  setTimeout(() => {
-    justCopied.value = false
-  }, 2000)
+  try {
+    await navigator.clipboard.writeText(text)
+    justCopied.value = true
+    success("Скопировано в буфер обмена")
+    setTimeout(() => {
+      justCopied.value = false
+    }, 2000)
+  } catch {
+    showError("Не удалось скопировать в буфер обмена")
+  }
 }
 
 async function copyFullPrompt() {

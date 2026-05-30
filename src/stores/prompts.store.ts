@@ -59,6 +59,7 @@ export const usePromptsStore = defineStore("prompts", () => {
   function clearPrompt() {
     currentPrompt.value = null
     error.value = null
+    additionalContext.value = ""
   }
 
   return {
