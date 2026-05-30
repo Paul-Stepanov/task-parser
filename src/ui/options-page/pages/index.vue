@@ -293,6 +293,29 @@ async function testConnection() {
           </div>
         </template>
       </div>
+
+      <!-- Back to main -->
+      <RouterLink
+        to="/side-panel"
+        class="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150"
+        style="
+          background-color: var(--primary);
+          color: white;
+        "
+      >
+        <svg
+          class="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        На главную
+      </RouterLink>
     </div>
   </div>
 </template>
