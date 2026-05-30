@@ -2,6 +2,7 @@
 import { usePromptsStore } from "@/stores/prompts.store"
 import { useToast } from "@/composables/useToast"
 import { computed, ref } from "vue"
+import BaseButton from "@/ui/common/components/BaseButton.vue"
 
 const promptsStore = usePromptsStore()
 const { success } = useToast()
@@ -33,18 +34,20 @@ async function copyFullPrompt() {
         }}
       </h3>
       <div class="flex gap-2">
-        <button
-          class="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+        <BaseButton
+          variant="primary"
+          class="text-xs"
           @click="copyFullPrompt"
         >
           Копировать всё
-        </button>
-        <button
-          class="text-xs px-2 py-1 border rounded hover:bg-gray-50 dark:hover:bg-gray-800"
+        </BaseButton>
+        <BaseButton
+          variant="outline"
+          class="text-xs"
           @click="showSystem = !showSystem"
         >
           {{ showSystem ? "Скрыть system" : "Показать system" }}
-        </button>
+        </BaseButton>
       </div>
     </div>
 

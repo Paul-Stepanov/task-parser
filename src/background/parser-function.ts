@@ -1,6 +1,8 @@
+import type { Bitrix24TaskData } from "@/types/bitrix24"
+
 export default function parseBitrix24Task(): Promise<{
   success: boolean
-  data?: Record<string, unknown>
+  data?: Bitrix24TaskData
   error?: string
   debugInfo?: Record<string, unknown>
 }> {
@@ -180,12 +182,12 @@ export default function parseBitrix24Task(): Promise<{
     }
 
     // Сбор данных из всех табов
-    function collectAllTabData(iframeDoc: Document): Record<string, unknown> {
+    function collectAllTabData(iframeDoc: Document): Bitrix24TaskData {
       const taskScope = findTaskScope(iframeDoc)
       const taskId = extractTaskId()
       const taskTitle = extractTaskTitle(iframeDoc)
 
-      const taskData: Record<string, unknown> = {
+      const taskData: Bitrix24TaskData = {
         taskId,
         taskTitle,
         title: document.title,

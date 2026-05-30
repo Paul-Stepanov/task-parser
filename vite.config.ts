@@ -29,7 +29,9 @@ export default defineConfig({
       input: {},
     },
     terserOptions: {
-      mangle: false,
+      mangle: {
+        keep_fnames: true,
+      },
     },
   },
 

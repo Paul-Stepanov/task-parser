@@ -24,8 +24,9 @@ export class GitLabAPI {
   private async fetchAllPages<T>(url: URL): Promise<T[]> {
     const items: T[] = []
     let page = 1
+    const MAX_PAGES = 100
 
-    while (true) {
+    while (page <= MAX_PAGES) {
       url.searchParams.set("page", page.toString())
       url.searchParams.set("per_page", "100")
 

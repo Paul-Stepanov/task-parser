@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { ref, computed } from "vue"
+import { ref, shallowRef, computed, watch } from "vue"
 import { useBrowserLocalStorage } from "@/composables/useBrowserStorage"
 import type {
   GitLabSettings,
@@ -7,7 +7,7 @@ import type {
   GitLabGroup,
   GitLabProject,
 } from "@/types/gitlab"
-import { createGitLabAPI } from "@/utils/gitlab-api"
+import { GitLabAPI, createGitLabAPI } from "@/utils/gitlab-api"
 
 export const useGitLabStore = defineStore("gitlab", () => {
   const { data: settings } = useBrowserLocalStorage<GitLabSettings>(
@@ -23,6 +23,8 @@ export const useGitLabStore = defineStore("gitlab", () => {
       enabled: false,
     },
   )
+
+  const apiInstance = shallowRef<GitLabAPI | null>(null)
 
   const groups = ref<GitLabGroup[]>([])
   const projects = ref<GitLabProject[]>([])
@@ -43,6 +45,23 @@ export const useGitLabStore = defineStore("gitlab", () => {
     () => commitsData.value !== null && commitsData.value.commits.length > 0,
   )
 
+  watch(
+    () => [settings.value.token, settings.value.gitlabUrl],
+    () => {
+      apiInstance.value = null
+    },
+  )
+
+  async function getAPI(): Promise<GitLabAPI> {
+    if (!apiInstance.value) {
+      apiInstance.value = await createGitLabAPI({
+        token: settings.value.token,
+        gitlabUrl: settings.value.gitlabUrl,
+      })
+    }
+    return apiInstance.value!
+  }
+
   async function loadGroups() {
     if (!settings.value.token || !settings.value.gitlabUrl) return
 
@@ -50,11 +69,7 @@ export const useGitLabStore = defineStore("gitlab", () => {
     groupsError.value = null
 
     try {
-      const api = await createGitLabAPI({
-        token: settings.value.token,
-        gitlabUrl: settings.value.gitlabUrl,
-      })
-
+      const api = await getAPI()
       groups.value = await api.getGroups()
     } catch (error) {
       groupsError.value =
@@ -71,11 +86,7 @@ export const useGitLabStore = defineStore("gitlab", () => {
     projectsError.value = null
 
     try {
-      const api = await createGitLabAPI({
-        token: settings.value.token,
-        gitlabUrl: settings.value.gitlabUrl,
-      })
-
+      const api = await getAPI()
       projects.value = await api.getProjectsByGroup(settings.value.groupId)
     } catch (error) {
       projectsError.value =
@@ -127,10 +138,7 @@ export const useGitLabStore = defineStore("gitlab", () => {
     commitsError.value = null
 
     try {
-      const api = await createGitLabAPI({
-        token: settings.value.token,
-        gitlabUrl: settings.value.gitlabUrl,
-      })
+      const api = await getAPI()
 
       commitsData.value = await api.getCommitsData(
         settings.value.projectId!,
