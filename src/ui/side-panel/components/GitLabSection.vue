@@ -1,12 +1,59 @@
 <script setup lang="ts">
 import BaseButton from "@/ui/common/components/BaseButton.vue"
 import BaseInput from "@/ui/common/components/BaseInput.vue"
-import { ref } from "vue"
+import BaseSelect from "@/ui/common/components/BaseSelect.vue"
+import { computed, onMounted, ref } from "vue"
 import { useGitLabStore } from "@/stores/gitlab.store"
 import CommitsDisplay from "./CommitsDisplay.vue"
 
 const gitlabStore = useGitLabStore()
-const branchInput = ref("")
+const branchInput = ref("feature/")
+
+const hasCredentials = computed(
+  () =>
+    gitlabStore.settings.enabled &&
+    gitlabStore.settings.token &&
+    gitlabStore.settings.gitlabUrl,
+)
+
+const groupOptions = computed(() =>
+  gitlabStore.groups.map((g) => ({
+    value: g.id,
+    label: g.full_name || g.name,
+  })),
+)
+
+const projectOptions = computed(() =>
+  gitlabStore.projects.map((p) => ({
+    value: p.id,
+    label: p.name,
+  })),
+)
+
+onMounted(async () => {
+  if (hasCredentials.value && gitlabStore.groups.length === 0) {
+    await gitlabStore.loadGroups()
+  }
+})
+
+async function handleGroupChange(value: string | number | undefined) {
+  if (!value) {
+    gitlabStore.clearGroupSelection()
+    return
+  }
+  const groupId = typeof value === "number" ? value : Number(value)
+  gitlabStore.selectGroup(groupId)
+  await gitlabStore.loadProjects()
+}
+
+function handleProjectChange(value: string | number | undefined) {
+  if (!value) {
+    gitlabStore.clearProjectSelection()
+    return
+  }
+  const projectId = typeof value === "number" ? value : Number(value)
+  gitlabStore.selectProject(projectId)
+}
 
 async function handleFetchCommits() {
   if (!branchInput.value.trim()) return
@@ -16,7 +63,7 @@ async function handleFetchCommits() {
 
 <template>
   <section
-    v-if="gitlabStore.isConfigured"
+    v-if="hasCredentials"
     class="flex flex-col gap-3 p-3 rounded-lg border animate-fade-in"
     style="
       background-color: var(--card);
@@ -41,19 +88,107 @@ async function handleFetchCommits() {
         </svg>
       </div>
       <div class="flex-1 min-w-0">
-        <h3 class="text-sm font-medium leading-tight">GitLab коммиты</h3>
-        <p
-          v-if="gitlabStore.settings.projectName"
-          class="text-xs truncate font-mono"
-          style="color: var(--muted-foreground)"
-        >
-          {{ gitlabStore.settings.projectName }}
-        </p>
+        <h3 class="text-sm font-medium leading-tight">GitLab</h3>
       </div>
     </div>
 
+    <!-- Group selector -->
+    <div>
+      <BaseSelect
+        :model-value="gitlabStore.settings.groupId"
+        :options="groupOptions"
+        placeholder="Выберите группу..."
+        :disabled="gitlabStore.isLoadingGroups"
+        @update:model-value="handleGroupChange"
+      />
+      <p
+        v-if="gitlabStore.isLoadingGroups"
+        class="text-xs mt-1.5 flex items-center gap-1.5"
+        style="color: var(--muted-foreground)"
+      >
+        <svg
+          class="w-3 h-3 animate-spin"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            opacity="0.25"
+          />
+          <path
+            d="M12 2a10 10 0 0 1 10 10"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+        </svg>
+        Загрузка групп...
+      </p>
+      <p
+        v-if="gitlabStore.groupsError"
+        class="text-xs mt-1.5"
+        style="color: var(--destructive)"
+      >
+        {{ gitlabStore.groupsError }}
+      </p>
+    </div>
+
+    <!-- Project selector -->
+    <div v-if="gitlabStore.settings.groupId">
+      <BaseSelect
+        :model-value="gitlabStore.settings.projectId"
+        :options="projectOptions"
+        placeholder="Выберите проект..."
+        :disabled="gitlabStore.isLoadingProjects"
+        @update:model-value="handleProjectChange"
+      />
+      <p
+        v-if="gitlabStore.isLoadingProjects"
+        class="text-xs mt-1.5 flex items-center gap-1.5"
+        style="color: var(--muted-foreground)"
+      >
+        <svg
+          class="w-3 h-3 animate-spin"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            opacity="0.25"
+          />
+          <path
+            d="M12 2a10 10 0 0 1 10 10"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+          />
+        </svg>
+        Загрузка проектов...
+      </p>
+      <p
+        v-if="gitlabStore.projectsError"
+        class="text-xs mt-1.5"
+        style="color: var(--destructive)"
+      >
+        {{ gitlabStore.projectsError }}
+      </p>
+    </div>
+
     <!-- Branch input -->
-    <div class="flex gap-2">
+    <div
+      v-if="gitlabStore.settings.projectId"
+      class="flex gap-2"
+    >
       <BaseInput
         v-model="branchInput"
         placeholder="Название ветки"

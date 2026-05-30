@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import BaseInput from "@/ui/common/components/BaseInput.vue"
-import BaseSelect from "@/ui/common/components/BaseSelect.vue"
 import BaseButton from "@/ui/common/components/BaseButton.vue"
 import { useGitLabStore } from "@/stores/gitlab.store"
 import { useGitLabValidation } from "@/composables/useGitLabValidation"
@@ -18,20 +17,6 @@ const { tokenError, urlError, isValid } = useGitLabValidation(token, gitlabUrl)
 const testResult = ref<{ success: boolean; message: string } | null>(null)
 const isTesting = ref(false)
 
-const groupOptions = computed(() =>
-  gitlabStore.groups.map((g) => ({
-    value: g.id,
-    label: g.full_name || g.name,
-  })),
-)
-
-const projectOptions = computed(() =>
-  gitlabStore.projects.map((p) => ({
-    value: p.id,
-    label: p.name,
-  })),
-)
-
 const hasCredentials = computed(
   () =>
     gitlabStore.settings.token &&
@@ -39,14 +24,9 @@ const hasCredentials = computed(
     isValid.value,
 )
 
-const isFullyConfigured = computed(() => gitlabStore.isConfigured)
-
 async function testConnection() {
   testResult.value = null
   isTesting.value = true
-  gitlabStore.clearGroupSelection()
-  gitlabStore.groups = []
-  gitlabStore.projects = []
 
   try {
     const { createGitLabAPI } = await import("@/utils/gitlab-api")
@@ -57,19 +37,9 @@ async function testConnection() {
 
     testResult.value = {
       success: true,
-      message: "Соединение успешно! Загрузка групп...",
+      message: "Подключение успешно!",
     }
     success(testResult.value.message)
-
-    await gitlabStore.loadGroups()
-
-    if (gitlabStore.groups.length === 0) {
-      testResult.value = {
-        success: false,
-        message: "Нет доступных групп для вашего токена.",
-      }
-      showError(testResult.value.message)
-    }
   } catch (err) {
     testResult.value = {
       success: false,
@@ -79,27 +49,6 @@ async function testConnection() {
   } finally {
     isTesting.value = false
   }
-}
-
-async function handleGroupChange(value: string | number | undefined) {
-  if (!value) {
-    gitlabStore.clearGroupSelection()
-    return
-  }
-
-  const groupId = typeof value === "number" ? value : Number(value)
-  gitlabStore.selectGroup(groupId)
-  await gitlabStore.loadProjects()
-}
-
-function handleProjectChange(value: string | number | undefined) {
-  if (!value) {
-    gitlabStore.clearProjectSelection()
-    return
-  }
-
-  const projectId = typeof value === "number" ? value : Number(value)
-  gitlabStore.selectProject(projectId)
 }
 </script>
 
@@ -341,159 +290,6 @@ function handleProjectChange(value: string | number | undefined) {
                 {{ testResult.message }}
               </div>
             </Transition>
-
-            <!-- Group/Project selection -->
-            <template v-if="gitlabStore.groups.length > 0">
-              <div
-                class="border-t pt-5 mt-1 flex flex-col gap-4"
-                style="border-color: var(--border)"
-              >
-                <div>
-                  <label
-                    class="block text-sm font-medium mb-1.5"
-                    style="color: var(--foreground)"
-                  >
-                    Группа
-                  </label>
-                  <BaseSelect
-                    :model-value="gitlabStore.settings.groupId"
-                    :options="groupOptions"
-                    placeholder="Выберите группу..."
-                    :disabled="gitlabStore.isLoadingGroups"
-                    @update:model-value="handleGroupChange"
-                  />
-                  <p
-                    v-if="gitlabStore.isLoadingGroups"
-                    class="text-xs mt-1.5 flex items-center gap-1.5"
-                    style="color: var(--muted-foreground)"
-                  >
-                    <svg
-                      class="w-3 h-3 animate-spin"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        stroke-width="3"
-                        stroke-linecap="round"
-                        opacity="0.25"
-                      />
-                      <path
-                        d="M12 2a10 10 0 0 1 10 10"
-                        stroke="currentColor"
-                        stroke-width="3"
-                        stroke-linecap="round"
-                      />
-                    </svg>
-                    Загрузка групп...
-                  </p>
-                </div>
-
-                <div v-if="gitlabStore.settings.groupId">
-                  <label
-                    class="block text-sm font-medium mb-1.5"
-                    style="color: var(--foreground)"
-                  >
-                    Проект
-                  </label>
-                  <BaseSelect
-                    :model-value="gitlabStore.settings.projectId"
-                    :options="projectOptions"
-                    placeholder="Выберите проект..."
-                    :disabled="gitlabStore.isLoadingProjects"
-                    @update:model-value="handleProjectChange"
-                  />
-                  <p
-                    v-if="gitlabStore.isLoadingProjects"
-                    class="text-xs mt-1.5 flex items-center gap-1.5"
-                    style="color: var(--muted-foreground)"
-                  >
-                    <svg
-                      class="w-3 h-3 animate-spin"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        stroke-width="3"
-                        stroke-linecap="round"
-                        opacity="0.25"
-                      />
-                      <path
-                        d="M12 2a10 10 0 0 1 10 10"
-                        stroke="currentColor"
-                        stroke-width="3"
-                        stroke-linecap="round"
-                      />
-                    </svg>
-                    Загрузка проектов...
-                  </p>
-                  <p
-                    v-if="gitlabStore.projectsError"
-                    class="text-xs mt-1.5"
-                    style="color: var(--destructive)"
-                  >
-                    {{ gitlabStore.projectsError }}
-                  </p>
-                </div>
-
-                <!-- Configuration complete -->
-                <Transition name="section">
-                  <div
-                    v-if="isFullyConfigured"
-                    class="p-3 rounded-lg flex items-center justify-between"
-                    style="
-                      background-color: color-mix(
-                        in srgb,
-                        var(--success) 10%,
-                        transparent
-                      );
-                      border: 1px solid
-                        color-mix(
-                          in srgb,
-                          var(--success) 20%,
-                          transparent
-                        );
-                    "
-                  >
-                    <div
-                      class="flex items-center gap-2 text-sm"
-                      style="color: var(--success)"
-                    >
-                      <svg
-                        class="w-4 h-4 shrink-0"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                        <polyline points="22 4 12 14.01 9 11.01" />
-                      </svg>
-                      <span>
-                        {{ gitlabStore.settings.groupName }} /
-                        {{ gitlabStore.settings.projectName }}
-                      </span>
-                    </div>
-                    <RouterLink
-                      to="/side-panel"
-                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-colors duration-150"
-                      style="background-color: var(--primary)"
-                    >
-                      Готово
-                    </RouterLink>
-                  </div>
-                </Transition>
-              </div>
-            </template>
           </div>
         </template>
       </div>
