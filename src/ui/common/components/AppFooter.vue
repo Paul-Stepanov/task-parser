@@ -5,13 +5,13 @@ const version = __VERSION__
 <template>
   <footer
     class="border-t mt-auto"
-    style="background-color: var(--background)"
+    style="border-color: var(--border); background-color: var(--background)"
   >
     <div
-      class="px-4 py-2 text-center text-xs"
+      class="px-4 py-2 text-center text-xs tracking-wide"
       style="color: var(--muted-foreground)"
     >
-      Task Parser v{{ version }}
+      v{{ version }}
     </div>
   </footer>
 </template>

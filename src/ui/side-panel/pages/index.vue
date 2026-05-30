@@ -19,22 +19,63 @@ function handleClearAll() {
 </script>
 
 <template>
-  <div class="p-4 space-y-4">
+  <div class="flex flex-col gap-3 p-4">
+    <!-- Title bar -->
     <div class="flex items-center justify-between">
-      <h1 class="text-lg font-semibold">Task Parser</h1>
-      <BaseButton
+      <div class="flex items-center gap-2">
+        <div
+          class="w-1.5 h-5 rounded-full"
+          style="background-color: var(--primary)"
+        />
+        <h1
+          class="text-base font-semibold tracking-tight"
+          style="color: var(--foreground)"
+        >
+          Задача
+        </h1>
+      </div>
+      <button
         v-if="taskStore.hasTask || gitlabStore.hasCommits"
-        variant="destructive"
-        class="text-xs"
+        class="text-xs px-2.5 py-1 rounded-md transition-colors duration-150 flex items-center gap-1"
+        style="
+          color: var(--muted-foreground);
+          background-color: var(--muted);
+        "
         @click="handleClearAll"
       >
+        <svg
+          class="w-3 h-3"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="3 6 5 6 21 6" />
+          <path
+            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+          />
+        </svg>
         Очистить
-      </BaseButton>
+      </button>
     </div>
 
-    <!-- Секции -->
-    <ParseSection />
-    <GitLabSection v-if="taskStore.hasTask" />
-    <PromptsSection v-if="taskStore.hasTask" />
+    <!-- Sections with transitions -->
+    <TransitionGroup
+      name="section"
+      tag="div"
+      class="flex flex-col gap-3"
+    >
+      <ParseSection key="parse" />
+      <GitLabSection
+        v-if="taskStore.hasTask"
+        key="gitlab"
+      />
+      <PromptsSection
+        v-if="taskStore.hasTask"
+        key="prompts"
+      />
+    </TransitionGroup>
   </div>
 </template>

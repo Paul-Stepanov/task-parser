@@ -22,13 +22,18 @@ const emit = defineEmits<{
 }>()
 
 const classes = computed(() => {
-  const base = "w-full px-3 py-2 border rounded text-sm transition-colors"
+  const base =
+    "w-full px-3 py-2 border rounded-lg text-sm transition-all duration-150 bg-[var(--card)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-[var(--background)]"
 
   const errorClasses = props.error
-    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+    ? "border-[var(--destructive)] focus:ring-[var(--destructive)]"
+    : "border-[var(--input)] focus:ring-[var(--ring)] focus:border-[var(--ring)]"
 
-  return `${base} ${errorClasses}`
+  const disabledClasses = props.disabled
+    ? "opacity-50 cursor-not-allowed"
+    : ""
+
+  return `${base} ${errorClasses} ${disabledClasses}`
 })
 
 function onInput(event: Event) {
@@ -53,8 +58,36 @@ function onInput(event: Event) {
     />
     <p
       v-if="error"
-      class="text-xs text-red-500 mt-1"
+      class="text-xs mt-1.5 flex items-center gap-1"
+      style="color: var(--destructive)"
     >
+      <svg
+        class="w-3 h-3 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <line
+          x1="12"
+          y1="8"
+          x2="12"
+          y2="12"
+        />
+        <line
+          x1="12"
+          y1="16"
+          x2="12.01"
+          y2="16"
+        />
+      </svg>
       {{ error }}
     </p>
   </div>

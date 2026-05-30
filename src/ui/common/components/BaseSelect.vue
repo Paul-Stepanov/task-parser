@@ -27,15 +27,15 @@ const emit = defineEmits<{
 
 const classes = computed(() => {
   const base =
-    "w-full px-3 py-2 border rounded text-sm transition-colors appearance-none bg-no-repeat"
+    "w-full px-3 py-2 border rounded-lg text-sm transition-all duration-150 appearance-none bg-[var(--card)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-[var(--background)]"
 
   const errorClasses = props.error
-    ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:border-gray-600 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+    ? "border-[var(--destructive)] focus:ring-[var(--destructive)]"
+    : "border-[var(--input)] focus:ring-[var(--ring)] focus:border-[var(--ring)]"
 
   const disabledClasses = props.disabled
-    ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500"
-    : "bg-white dark:bg-gray-900"
+    ? "opacity-50 cursor-not-allowed"
+    : ""
 
   return `${base} ${errorClasses} ${disabledClasses}`
 })
@@ -48,7 +48,7 @@ function onChange(event: Event) {
 </script>
 
 <template>
-  <div>
+  <div class="relative">
     <select
       :value="modelValue ?? ''"
       :disabled="disabled"
@@ -69,10 +69,55 @@ function onChange(event: Event) {
         {{ option.label }}
       </option>
     </select>
+    <!-- Custom chevron -->
+    <div
+      class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+      style="color: var(--muted-foreground)"
+    >
+      <svg
+        class="w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </div>
     <p
       v-if="error"
-      class="text-xs text-red-500 mt-1"
+      class="text-xs mt-1.5 flex items-center gap-1"
+      style="color: var(--destructive)"
     >
+      <svg
+        class="w-3 h-3 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+        />
+        <line
+          x1="12"
+          y1="8"
+          x2="12"
+          y2="12"
+        />
+        <line
+          x1="12"
+          y1="16"
+          x2="12.01"
+          y2="16"
+        />
+      </svg>
       {{ error }}
     </p>
   </div>
